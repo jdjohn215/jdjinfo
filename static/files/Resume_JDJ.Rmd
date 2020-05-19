@@ -1,0 +1,133 @@
+---
+title: "John D. Johnson's resume"
+author: John D. Johnson
+date: "`r Sys.Date()`"
+output:
+  pagedown::html_resume:
+    # set it to true for a self-contained HTML page but it'll take longer to render
+    self_contained: false
+# uncomment this line to produce HTML and PDF in RStudio:
+#knit: pagedown::chrome_print
+---
+
+Aside
+================================================================================
+
+Portfolio {#portfolio}
+--------------------------------------------------------------------------------
+
+- <i class="fa fa-globe"></i> johndjohnson.info
+- <i class="fa fa-github"></i> [github.com/jdjohn215](github.com/jdjohn215)
+
+Contact Info {#contact}
+--------------------------------------------------------------------------------
+
+- <i class="fa fa-envelope"></i> jdjohn215@gmail.com
+- <i class="fa fa-phone"></i> 414 288-3971 (work)
+
+
+Skills {#skills}
+--------------------------------------------------------------------------------
+
+- Experienced in data analysis, public opinion research, data visualization,
+and mapping.
+
+- Highly skilled in R, including package development, shiny web applications,
+and data collection/cleaning.
+
+
+Disclaimer {#disclaimer}
+--------------------------------------------------------------------------------
+
+Last updated on `r Sys.Date()`.
+
+
+
+Main
+================================================================================
+
+John D. Johnson {#title}
+--------------------------------------------------------------------------------
+
+I'm a quantitative social scientist and data analyst with 4+ years of experience with
+public opinion polling, elections analysis, Census research, and creative
+applications of administrative data to advance understanding of economic,
+demographic, and political issues.
+
+My work has been cited in national publications including *The Atlantic*, NBC Latino,
+and the Associated Press, as well as numerous local publications such as the
+*Milwaukee Journal Sentinel*, the *Milwaukee Business Journal*, WUWM, *Urban Milwaukee*,
+and the *Isthmus*. I frequently publish analysis and commentary online on the [Marquette
+Faculty Blog](https://law.marquette.edu/facultyblog/author/john-johnson/).
+
+Professional Experience {data-icon=laptop}
+--------------------------------------------------------------------------------
+
+### Research Fellow
+
+Marquette University Law School Lubar Center for Public Policy Research and Civic Education
+
+Milwaukee, Wisconsin
+
+2016 - present
+
+::: concise
+- Collaborate on survey design and analysis of the Marquette Law Poll
+- Analyze demographic, political, and economic trends in Milwaukee and Wisconsin
+- Transition workflows from Stata and SPSS into R, including the creation of
+interactive tools
+- Author and maintain R packages including `pollster`
+:::
+
+
+Education {data-icon=graduation-cap data-concise=true}
+--------------------------------------------------------------------------------
+
+### University of Illinois Chicago
+
+M.A. in Political Science
+
+Chicago, Illinois
+
+2015
+
+American politics, urban politics, research methods
+
+### Western Illinois University
+
+B.A. in History and Political Science
+
+Macomb, Illinois
+
+2014
+
+20th century history, comparative politics, international relations
+
+
+Selected Publications {data-icon=file}
+--------------------------------------------------------------------------------
+
+### It's an Unsettling Day in the Neighborhoods
+
+*Marquette Lawyer Magazine*, Summer 2020
+
+Milwaukee 
+
+Gousha and **Johnson**
+
+### Thousands of Milwaukee homes are no longer owned by city residents in a massive transfer of wealth since the Great Recession
+
+*Milwaukee Journal Sentinel*, January 30, 2020
+
+Milwaukee
+
+Gousha and **Johnson**
+
+### Migration Challenges
+
+*Marquette Lawyer Magazine*, Summer 2018
+
+Milwaukee
+
+**Johnson** and Franklin
+
