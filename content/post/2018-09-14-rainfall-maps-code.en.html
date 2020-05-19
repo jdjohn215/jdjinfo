@@ -1,0 +1,185 @@
+---
+title: Rainfall maps code
+author: John D. Johnson
+date: '2018-09-14'
+slug: rainfall-maps-code
+categories:
+  - United States
+tags: []
+Description: ''
+Tags: []
+Categories: []
+DisableComments: no
+---
+
+
+
+<p>This code builds the county-level map in <a href="http://johndjohnson.info/2018/09/14/national-rainfall-maps/"><strong>this post</strong></a>.</p>
+<p>A note of caution: this code takes a long time to run on a powerful iMAC. Depending on your machine it may take even longer.</p>
+<p>Any geography may be substituted for counties.</p>
+<pre class="r"><code>rm(list = ls())
+
+library(tidyverse)
+library(sf)
+library(tmap)
+
+
+############################################################
+# Climatological normals
+############################################################
+
+# Get 1981-2010 normals
+# About: ftp://ftp.ncdc.noaa.gov/pub/data/normals/1981-2010/readme.txt
+normals &lt;- read_table(&quot;ftp://ftp.ncdc.noaa.gov/pub/data/normals/1981-2010/products/precipitation/ytd-prcp-normal.txt&quot;,
+                      col_names = c(&quot;STNID&quot;,&quot;MONTH&quot;,&quot;d1&quot;,&quot;d2&quot;,&quot;d3&quot;,&quot;d4&quot;,&quot;d5&quot;,&quot;d6&quot;,&quot;d7&quot;,
+                                    &quot;d8&quot;,&quot;d9&quot;,&quot;d10&quot;,&quot;d11&quot;,&quot;d12&quot;,&quot;d13&quot;,&quot;d14&quot;,&quot;d15&quot;,
+                                    &quot;d16&quot;,&quot;d17&quot;,&quot;d18&quot;,&quot;d19&quot;,&quot;d20&quot;,&quot;d21&quot;,&quot;d22&quot;,&quot;d23&quot;,
+                                    &quot;d24&quot;,&quot;d25&quot;,&quot;d26&quot;,&quot;d27&quot;,&quot;d28&quot;,&quot;d29&quot;,&quot;d30&quot;,&quot;d31&quot;))
+
+# Remove flags from the ends of the vars
+remove.flag &lt;- function(column){
+  str_sub(column, start = 1, end = (nchar(column)-1))
+}
+normals[,c(3:33)] &lt;- apply(normals[,c(3:33)], 2, remove.flag)
+normals[,c(3:33)] &lt;- apply(normals[,c(3:33)], 2, as.numeric)
+
+# Collapse into key-value pairs
+normals &lt;- gather(normals, key=&quot;DAY&quot;, value = &quot;precip&quot;, -STNID, -MONTH)
+
+# Reformat days
+normals$DAY &lt;- str_pad(str_replace(normals$DAY, &quot;d&quot;, &quot;&quot;), 
+                       width = 2, side = &quot;left&quot;, pad = &quot;0&quot;)
+
+# Replace negative values with NA
+normals$precip[normals$precip&lt;0] &lt;- NA
+
+# Make date variable
+normals$date &lt;- as.Date(paste(str_sub(Sys.Date(),1,4), normals$MONTH, normals$DAY, sep = &quot;-&quot;))
+
+# Convert precip variable to inches
+normals$precip &lt;- normals$precip/100 #  It&#39;s 100ths of inch
+
+
+############################################################
+# Current rainfall
+############################################################
+
+# Get current year rainfall
+rain &lt;- read_csv(paste0(&quot;https://www1.ncdc.noaa.gov/pub/data/ghcn/daily/by_year/&quot;,
+                        str_sub(Sys.Date(),1,4),
+                        &quot;.csv.gz&quot;),
+                 col_names = c(&quot;STNID&quot;,&quot;date&quot;,&quot;type&quot;,&quot;amount&quot;,&quot;flag1&quot;,&quot;flag2&quot;,&quot;flag3&quot;,&quot;flag4&quot;))
+
+# Remove flags
+rain &lt;- rain[,c(1:4)]
+
+# Just keep precipitation
+rain &lt;- rain[rain$type==&quot;PRCP&quot;,]
+
+# Create date-formatted variable
+rain$date &lt;- as.Date(paste(str_sub(rain$date,1,4),
+                           str_sub(rain$date,5,6),
+                           str_sub(rain$date,7,8), sep = &quot;-&quot;))
+
+# Summarize to cumulative precipation for the most recent date available
+rain &lt;- rain %&gt;%
+  group_by(STNID) %&gt;%
+  arrange(date) %&gt;%
+  summarise(cum.precip = sum(amount),
+            date = last(date)) %&gt;%
+  filter(date &gt;= (Sys.Date()-30)) # Just keep stations updated in last 30 days
+
+# Convert cumulative precipation to inches
+rain$cum.precip &lt;- (rain$cum.precip/10)*0.03937008 #  it&#39;s 10ths of mm
+
+# Merge norms and rainfall, keeping just the relevant columns
+d &lt;- inner_join(normals[,c(&quot;STNID&quot;,&quot;date&quot;,&quot;precip&quot;)], rain)
+
+############################################################
+# Mapping
+############################################################
+
+# Read station locations
+stations &lt;- read_table(&quot;ftp://ftp.ncdc.noaa.gov/pub/data/normals/1981-2010/station-inventories/prcp-inventory.txt&quot;,
+                       col_names = c(&quot;STNID&quot;,&quot;latitude&quot;,&quot;longitude&quot;,&quot;elevation&quot;,&quot;state&quot;,&quot;name&quot;,&quot;gsnflag&quot;,
+                                     &quot;hcnflag&quot;,&quot;wmoid&quot;,&quot;method&quot;))
+
+# Convert to spatial (simple features) object
+stations &lt;- st_as_sf(stations, coords = c(&quot;longitude&quot;,&quot;latitude&quot;), crs = 4326)
+
+# Get counties shape, converting to simple features object
+counties &lt;- st_as_sf(tigris::counties())
+counties &lt;- counties[as.numeric(as.character(counties$STATEFP))&lt;57 &amp;
+                       counties$STATEFP!=&quot;15&quot; &amp; counties$STATEFP!=&quot;02&quot;,]
+stations &lt;- st_transform(stations, crs = st_crs(counties))
+
+# Get states shape, converting to simple features object
+state &lt;- st_as_sf(tigris::states())
+state &lt;- state[as.numeric(as.character(state$STATEFP))&lt;57 &amp;
+                 state$STATEFP!=&quot;15&quot; &amp; state$STATEFP!=&quot;02&quot;,]
+
+# Transform the crs of stations to match that of counties
+stations &lt;- st_transform(stations, crs = st_crs(counties))
+
+# Match stations to counties
+stations &lt;- st_intersection(stations, counties)
+
+# Merge geocoded stations with rainfall data and summarize
+cnty.sum &lt;- inner_join(stations[,c(&quot;STNID&quot;,&quot;GEOID&quot;)], d) %&gt;% 
+  st_set_geometry(NULL) %&gt;% # converts from sf object to data_frame
+  group_by(GEOID) %&gt;% # group by station
+  summarise(norm.rain = mean(precip, na.rm = T),
+            rain.2018 = mean(cum.precip, na.rm = T),
+            firsdate = min(date), # oldest most-recent date used from county
+            lastdate = max(date)) # newest most-recent date used from county
+
+# Match summarized county data to county shapefile
+to.map &lt;- left_join(counties, cnty.sum)
+
+# Calculate this year&#39;s rainfall as a percent of normal
+to.map$pOfNorm &lt;- to.map$rain.2018/to.map$norm.rain*100
+# Adjust so palette treats correctly
+#to.map$p.diff[!is.na(to.map$p.diff)&lt;100] &lt;- to.map$p.diff[!is.na(to.map$p.diff)&lt;100]*(-1)
+to.map$pOfNorm2 &lt;- to.map$pOfNorm-100
+
+# Get first and last dates included in current coverage
+# This is necessary because stations update info at different times
+last.date &lt;- max(to.map$lastdate[!is.na(to.map$lastdate)])
+first.date &lt;- min(to.map$firsdate[!is.na(to.map$firsdate)])
+
+
+p.norm.map &lt;- tm_shape(to.map) +
+  tm_polygons(border.alpha = 0) +
+  tm_shape(to.map) +
+  tm_fill(col = &quot;pOfNorm2&quot;, palette = &quot;RdBu&quot;,
+          breaks = c(-Inf,-40,-30,-20,-10,0,10,20,30,40,Inf),
+          labels = c(&quot;less than 60%&quot;,&quot;60 to 70%&quot;,&quot;70 to 80%&quot;,
+                     &quot;80 to 90%&quot;, &quot;90 to 100%&quot;,
+                     &quot;100 to 110%&quot;, &quot;110 to 120%&quot;,&quot;120 to 130%&quot;,
+                     &quot;130 to 140%&quot;, &quot;Greater than 140%&quot;),
+          title = &quot;% of normal&quot;) +
+  tm_shape(state) +
+  tm_polygons(border.alpha = 1, alpha = 0) +
+  tm_layout(frame = F, title.position = c(.63,.93), fontfamily = &quot;serif&quot;,
+            title = paste(str_sub(Sys.Date(),1,4), 
+                          &quot;rainfall as a % of normal rainfall&quot;)) +
+  tm_credits(text = paste0(&quot;End dates range from &quot;,
+                           first.date, &quot; to &quot;,
+                           last.date,&quot;.&quot;),
+             position = c(.12,.15)) +
+  tm_credits(text = &quot;These statistics are generated by comparing 2018&quot;, 
+             position = c(.75,.25)) +
+  tm_credits(text = &quot;year-to-date rainfall to 1981-2000 ytd normals&quot;,
+             position = c(.75,.23)) +
+  tm_credits(text = &quot;as calculated by NOAA. 6,375 stations include&quot;,
+             position = c(.75,.21)) +
+  tm_credits(text = &quot;both 2018 data and NOAA normals. Counties are&quot;,
+             position = c(.75, .19)) +
+  tm_credits(text = &quot;colored with the average value for all stations&quot;,
+             position = c(.76,.17)) +
+  tm_credits(text = &quot;in that county. Counties with no useable&quot;,
+             position = c(.77,.15)) +
+  tm_credits(text = &quot;weather stations are left blank.&quot;,
+             position = c(.78,.13))
+save_tmap(tm=p.norm.map, &quot;~/path/PercentOfNorm_county.png&quot;,
+          width = 10)</code></pre>

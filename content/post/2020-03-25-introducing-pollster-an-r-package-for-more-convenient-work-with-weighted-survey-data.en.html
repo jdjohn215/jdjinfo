@@ -1,0 +1,28 @@
+---
+title: Introducing pollster, an R package for more convenient work with weighted survey
+  data
+author: John D. Johnson
+date: '2020-03-25'
+slug: introducing-pollster-an-r-package-for-more-convenient-work-with-weighted-survey-data
+categories:
+  - RStats
+  - Public opinion
+tags: []
+Description: ''
+Tags: []
+Categories: []
+DisableComments: no
+---
+
+
+
+<p>My R package <code>pollster</code> is now available <a href="https://cran.r-project.org/web/packages/pollster/index.html">on CRAN</a>. Lots of great R packages already exist for complex analysis of survey data. This package fills a gap by creating simple functions that build topline, crosstab, and summary tables of weighted survey data. Optionally, all of these tables can include the margin of error. The margin of error includes the design effect calculated in the manner described by <a href="doi:10.1002/bimj.19680100122">Kish (1965)</a>.</p>
+<p><code>pollster</code> automatically handles labelled data using the excellent <a href="https://cran.r-project.org/web/packages/labelled/vignettes/intro_labelled.html"><code>labelled</code> package</a>. All functions are compatible with non-standard evaluation as used in the tidyverse.</p>
+<p>The point of <code>pollster</code> is not to return pretty pre-formatted tables for publication. Instead, function output is always a tibble, or simple data frame. This allows you to easily pass the object to <code>ggplot</code>, <code>knitr::kable</code>, or any other graphing or table-formatting function.</p>
+<p>See these pages for examples of <code>pollster</code> at work.</p>
+<ul>
+<li><a href="https://github.com/jdjohn215/pollster/blob/master/README.md"><strong>ReadMe</strong></a> - a high level overview of each function</li>
+<li><a href="https://cran.r-project.org/web/packages/pollster/vignettes/toplines.html"><strong>toplines vignette</strong></a> - detailed descriptions of the functions to make toplines, with and without the margin of error</li>
+<li><a href="https://cran.r-project.org/web/packages/pollster/vignettes/crosstabs.html"><strong>crosstabs vignette</strong></a> - detailed descriptions of the functions for 2-way crosstabs</li>
+<li><a href="https://cran.r-project.org/web/packages/pollster/vignettes/crosstab3way.html"><strong>3-way crosstabs vignette</strong></a> - detailed descriptions of the functions for 3-way crosstabs</li>
+</ul>

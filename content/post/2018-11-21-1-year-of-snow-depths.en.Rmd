@@ -1,0 +1,18 @@
+---
+title: 1 year of snow depths
+author: John D. Johnson
+date: '2018-11-21'
+slug: 1-year-of-snow-depths
+categories:
+  - United States
+tags: []
+Description: ''
+Tags: []
+Categories: []
+DisableComments: no
+---
+![](/post/2018-11-21-1-year-of-snow-depths.en_files/5ec3303629abc765096910.gif)
+
+This gif shows snow depths at every U.S. weather station on each day from July 1, 2017 to June 30, 2018. Blue dots indicate snow on the ground; the size of the dot represents the depth of the snow. The faint, small tan dots represent weather stations.
+
+All data is from NOAA. Strange outliers may be data entry errors.

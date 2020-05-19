@@ -1,0 +1,27 @@
+---
+title: National rainfall maps
+author: John D. Johnson
+date: '2018-09-14'
+slug: national-rainfall-maps
+categories:
+  - United States
+tags: []
+Description: ''
+Tags: []
+Categories: []
+DisableComments: no
+---
+
+This maps shows 2018 year-to-date rainfall compared to the normal amount (as calculated by NOAA from 1981-2010). Counties colored blue have received more than the usual rainfall so far. Red counties have received less.
+
+If you'd like to replicate the first map, check out [**the code**](https://johndjohnson.info/2018/09/14/rainfall-maps-code/). Warning: it takes a *long* time to run.
+
+![](/post/2018-09-14-national-rainfall-maps.en_files/PercentOfNorm_county.png)
+
+After making this county-level map, it occured to me that political boundaries might not be the best way to represent this sort of natural phenomenon.
+
+Here is another version of the map, but this time the geographic level used are watersheds.[^1]
+
+![](/post/2018-09-14-national-rainfall-maps.en_files/PercentOfNorm_watershed.png)
+
+[^1]: Technically, I use 8-digit [Hydrological Unit Codes](https://en.wikipedia.org/wiki/Hydrological_code), not watersheds because they are too small for the available NOAA data.

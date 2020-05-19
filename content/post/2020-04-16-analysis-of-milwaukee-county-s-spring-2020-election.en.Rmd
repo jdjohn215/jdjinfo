@@ -1,0 +1,502 @@
+---
+title: Analysis of Milwaukee County's Spring 2020 Election
+author: John D. Johnson
+date: '2020-04-16'
+slug: analysis-of-milwaukee-county-s-spring-2020-election
+categories:
+  - Milwaukee
+  - Elections
+tags: []
+Description: ''
+Tags: []
+Categories: []
+DisableComments: no
+---
+
+```{r setup, include=FALSE}
+library(knitr)
+library(kableExtra)
+library(tidyverse)
+library(tmap)
+library(reactable)
+options(stringsAsFactors = FALSE)
+
+reporting.units <- readRDS("~/Dropbox/Projects/2020/April/AprilElection/MilwaukeeCountyResults/MilwaukeeCountyReportingUnitBoundariesJan2020.rds")
+results <- read_rds("~/Dropbox/Projects/2020/April/AprilElection/MilwaukeeCountyResults/MilwaukeeCountyElectionResults.rds")
+
+mcd.boundaries <- tigris::county_subdivisions(state = "WI", county = "079", cb = TRUE, class = "sf") %>%
+  sf::st_transform(crs = sf::st_crs(reporting.units))
+aldermanic.boundaries <- sf::st_read("~/Dropbox/Projects/SHPfiles/MilwaukeeAldermanicDistricts2018/alderman.shp") %>%
+  sf::st_transform(crs = sf::st_crs(reporting.units))
+wards.to.alder <- readRDS("~/Dropbox/Projects/2020/April/AprilElection/MilwaukeeCountyResults/MilwaukeeCityWardsToAldermanicDistricts.rds")
+majority.group <- read_rds("~/Dropbox/Projects/2020/April/AprilElection/MilwaukeeCountyResults/RacialMajorityInWard.rds")
+
+# This function makes a table of results by municipality
+muni_results <- function(thisrace){
+  results %>%
+    filter(race == thisrace) %>%
+    separate(ward_name, into = c("municipality", "drop"),
+             sep = " Ward") %>%
+    filter(! vote_choice %in% c("under_votes", "over_votes")) %>%
+    mutate(municipality = str_replace(municipality, "City of", "C."),
+           municipality = str_replace(municipality, "Village of", "V."),
+           municipality = str_replace(municipality, "Town of", "T.")) %>%
+    group_by(municipality) %>%
+    mutate(total_votes = sum(votes)) %>%
+    group_by(municipality, vote_choice) %>%
+    summarise(pct = (sum(votes)/first(total_votes))*100) %>%
+    mutate(vote_choice = str_to_title(str_replace_all(vote_choice, "_", " "))) %>%
+    pivot_wider(names_from = vote_choice, values_from = pct)
+}
+
+# this function makes a table of results by aldermanic district
+alder_results <- function(thisrace){
+  results %>%
+    filter(race == thisrace,
+           str_detect(ward_name, "City of Milwaukee")) %>%
+    inner_join(wards.to.alder, by = c("ward_number" = "reporting_unit_id")) %>%
+    filter(! vote_choice %in% c("under_votes", "over_votes")) %>%
+    group_by(aldermanic_district) %>%
+    mutate(total_votes = sum(votes)) %>%
+    group_by(aldermanic_district, vote_choice) %>%
+    summarise(pct = (sum(votes)/first(total_votes))*100) %>%
+    mutate(vote_choice = str_to_title(str_replace_all(vote_choice, "_", " "))) %>%
+    pivot_wider(names_from = vote_choice, values_from = pct) %>%
+    rename("Aldermanic Dist." = 1)
+}
+
+
+# this function makes a table of results to be mapped
+map_table <- function(thisrace, winner, loser){
+  inner_join(reporting.units,
+             results %>%
+               filter(race == thisrace,
+                      ! vote_choice %in% c("under_votes", "over_votes")) %>%
+               group_by(ward_number) %>%
+               mutate(total_votes = sum(votes),
+                      pct = (votes/total_votes)*100) %>%
+               select(reporting_unit_id = ward_number, vote_choice, pct) %>%
+               pivot_wider(names_from = vote_choice, values_from = pct) %>%
+               mutate(margin = {{winner}} - {{loser}}))
+}
+
+```
+
+# Election summary
+*(winners in bold)*
+
+All of the following results are from the unofficial returns posted online by the [Milwaukee County Election Commission](https://county.milwaukee.gov/files/county/county-clerk/Election-Commission/ElectionResultsCopy-1/2020/4-7-2020SpringElectionandPresidentialPrimary-Summary-UnofficialResults.txt).
+
+## Milwaukee County results
+
+1. Wisconsin Supreme Court Justice
+    * **Jill Karofsky - 67%**
+    * Daniel Kelly - 33%
+    
+2. Democratic Presidential Primary
+    * **Joe Biden - 58%**
+    * Bernie Sanders - 36%
+    
+3. County Executive
+    * **David Crowley - 50%**
+    * Chris Larson - 50%
+    
+## Milwaukee City results
+
+1. Milwaukee Mayor
+    * **Tom Barrett - 63%**
+    * Lena Taylor - 37%
+    
+2. City Attorney
+    * **Tearman Spencer - 61%**
+    * Grant Langley - 39%
+    
+3. City Comptroller
+    * **Aycha Sawa - 50%**
+    * Jason Fields - 49%
+    
+4. City Treasurer
+    * **Spencer Coggs - 67%**
+    * Brandon Methu - 33%
+    
+5. Milwaukee Public Schools Referendum
+    * **Yes - 78%**
+    * No - 22%
+    
+# Election detail
+
+## Wisconsin Supreme Court
+
+Jill Karofsky won Milwaukee County easily, carrying the City of Milwaukee and 16/18 suburbs. Kelly did best in the suburbs to the south of Milwaukee County where he won Franklin and Hales Corners. Karofsky's largest victory was in Shorewood. This most reliably Democratic municipality in Wisconsin gave her 86% of the vote. In fact, all of her greatest victories (apart from the City of Milwaukee) came in the wealthy North Shore suburbs. She got more than 70% of the vote in Fox Point, Bayside, Glendale, and Shorewood.
+
+```{r, warning=FALSE, message=FALSE, echo=FALSE, out.width= "60%", out.extra='style="float:right; padding:1px"', fig.width=6}
+map_table(thisrace = "Wisconsin Supreme Court",
+                    winner = jill_karofsky,
+                    loser = daniel_kelly) %>%
+  tm_shape() +
+  tm_fill(col = "margin", palette = "PRGn", midpoint = 0, style = "cont",
+          showNA = F,
+          title = "Karofsky minus Kelly") +
+  tm_shape(mcd.boundaries) +
+  tm_polygons(alpha = 0) +
+  tm_layout(frame = FALSE, legend.outside = T,
+            main.title = "Wisconsin Supreme Court Election",
+            fontfamily = "serif",
+            outer.margins = c(0,0,0,0))
+```
+
+```{r, warning=FALSE, message=FALSE, echo=FALSE, out.width= "40%", out.extra='style="float:left; padding:0px"'}
+muni_results("Wisconsin Supreme Court") %>%
+  select(1, "Kelly" = 2, "Karofsky" = 3) %>%
+  mutate_if(is.numeric, round, digits = 1) %>%
+  reactable(sortable = TRUE, striped = TRUE,
+            fullWidth = TRUE, compact = TRUE)
+```
+
+## Democratic Presidential Primary
+
+Bernie Sanders almost won Milwaukee County in 2016. He got 48% of the vote compared to Clinton's 52%. This year, his share fell to just 36% and he won 0 municipalities. His best performances came in the two primarily white (with significant Latino minorities) working class suburbs of West Milwaukee (44%) and West Allis (41%). He did worst in the likewise predominately white, but quite wealthy North Shore suburbs of Bayside, Fox Point, River Hills, and Whitefish Bay. Within Milwaukee, Sanders won Riverwest, much of the East Side, Bay View, and large parts of the predominately Latino Near South Side.
+
+```{r, warning=FALSE, message=FALSE, echo=FALSE, out.width= "60%", out.extra='style="float:right; padding:1px"', fig.width=6}
+map_table(thisrace = "Democratic Presidential Primary",
+                    winner = joe_biden,
+                    loser = bernie_sanders) %>%
+  tm_shape() +
+  tm_fill(col = "margin", palette = "PRGn", midpoint = 0, style = "cont",
+          showNA = F,
+          title = "Biden minus Sanders") +
+  tm_shape(mcd.boundaries) +
+  tm_polygons(alpha = 0) +
+  tm_layout(frame = FALSE, legend.outside = T,
+            main.title = "Democratic Presidential Primary",
+            fontfamily = "serif")
+```
+
+
+```{r, warning=FALSE, message=FALSE, echo=FALSE, out.width= "40%", out.extra='style="float:left; padding:0px"'}
+muni_results("Democratic Presidential Primary") %>%
+  select(municipality, "Biden" = `Joe Biden`, "Sanders" = `Bernie Sanders`) %>%
+  mutate_if(is.numeric, round, digits = 1) %>%
+  reactable(sortable = TRUE, striped = TRUE,
+            fullWidth = TRUE, compact = TRUE)
+```
+
+## County Executive
+
+The race for Milwaukee County Executive was the closest on the ballot. David Crowley defeated Chris Larson by just over 1,000 votes. Both men are Democratic state legislators, but Crowley ran as the more moderate choice while Larson is an avowed progressive. This led to an unusual set of coalitions for Milwaukee County. David Crowley overwhelming carried his political base on Milwaukee's North and Northwest Sides. To this he added victories in Brown Deer, River Hills, Whitefish Bay, Hales Corners, Bayside, Franklin, and Greendale. Larson won the rest of the City of Milwaukee, but with less overwhelming support. He also won victories in St. Francis, Shorewood, Cudahy, South Milwaukee, West Allis, (and narrowly in) Oak Creek, West Milwaukee, Wauwatosa, Greenfield, and Fox Point.
+
+```{r, warning=FALSE, message=FALSE, echo=FALSE, out.width= "60%", out.extra='style="float:right; padding:1px"', fig.width=6}
+map_table(thisrace = "Milwaukee County Executive",
+                    winner = david_crowley,
+                    loser = chris_larson) %>%
+  tm_shape() +
+  tm_fill(col = "margin", palette = "PRGn", midpoint = 0, style = "cont",
+          showNA = F,
+          title = "Crowley minus Larson") +
+  tm_shape(mcd.boundaries) +
+  tm_polygons(alpha = 0) +
+  tm_layout(frame = FALSE, legend.outside = T,
+            main.title = "Milwaukee County Executive",
+            fontfamily = "serif")
+```
+
+```{r, warning=FALSE, message=FALSE, echo=FALSE, out.width= "40%", out.extra='style="float:left; padding:0px"'}
+muni_results("Milwaukee County Executive") %>%
+  select(municipality, "Crowley" = `David Crowley`, "Larson" = `Chris Larson`) %>%
+  mutate_if(is.numeric, round, digits = 1) %>%
+  reactable(sortable = TRUE, striped = TRUE,
+            fullWidth = TRUE, compact = TRUE)
+```
+
+## Milwaukee Mayor
+
+Tom Barrett won reelection to his fifth consecutive term as mayor handily, despite State Senator Lena Taylor's strong performance on the North Side of Milwaukee.
+
+```{r, warning=FALSE, message=FALSE, echo=FALSE, out.width= "60%", out.extra='style="float:right; padding:1px"', fig.width=6}
+map_table(thisrace = "Milwaukee Mayor",
+                    winner = tom_barrett,
+                    loser = lena_taylor) %>%
+  tm_shape() +
+  tm_fill(col = "margin", palette = "PRGn", midpoint = 0, style = "cont",
+          showNA = F,
+          title = "Barrett minus Taylor") +
+  tm_shape(aldermanic.boundaries) +
+  tm_polygons(alpha = 0) +
+  tm_layout(frame = FALSE, legend.outside = T,
+            main.title = "Milwaukee Mayor",
+            fontfamily = "serif")
+```
+
+
+```{r, warning=FALSE, message=FALSE, echo=FALSE, out.width= "40%", out.extra='style="float:left; padding:0px"'}
+alder_results("Milwaukee Mayor") %>%
+  select(1, "Barrett" = `Tom Barrett`, "Taylor" = `Lena Taylor`) %>%
+  mutate_if(is.numeric, round, digits = 1) %>%
+  reactable(sortable = TRUE, striped = TRUE,
+            fullWidth = TRUE, compact = TRUE)
+```
+
+Milwaukee racial segregation is a depressingly inescable fact in nearly of all of these maps. Readers may have noticed that neither Lena Taylor and David Crowley, both African Americans, won many City of Milwaukee wards that didn't also have a black majority. I calculate that 127 of Milwaukee's 324 wards have a non-Hispanic white majority. Crowley won 16 of them and, Taylor won 2.
+
+Despite this, David Crowley still managed to win a majority of the city's vote (52% to Larson's 48%), while Taylor ran far behind him, winning just 37% of the citywide vote. This is because Crowley won an exceedingly large share of the vote in majority black wards (75%) while minimizing his loses in the majority white parts of the city where he got 40% of the vote. See the table below for details.
+
+```{r, warning=FALSE, message=FALSE, echo=FALSE}
+# calculate number of wards won
+# results %>% filter(str_detect(ward_name, "City of Milwaukee"), 
+#                    race == "Milwaukee Mayor", 
+#                    ! vote_choice %in% c("under_votes", "over_votes"), 
+#                    votes > 0) %>% 
+#   group_by(ward_number) %>% summarise(winner = paste(vote_choice[votes == max(votes)], collapse = " ")) %>%
+#   inner_join(majority.group) %>% 
+#   group_by(majority, winner) %>%
+#   summarise(count = n()) %>% 
+#   pivot_wider(names_from = winner, values_from = count)
+# results %>% filter(str_detect(ward_name, "City of Milwaukee"), 
+#                    race == "Milwaukee County Executive", 
+#                    ! vote_choice %in% c("under_votes", "over_votes"), 
+#                    votes > 0) %>% 
+#   group_by(ward_number) %>% summarise(winner = paste(vote_choice[votes == max(votes)], collapse = " ")) %>%
+#   inner_join(majority.group) %>% 
+#   group_by(majority, winner) %>%
+#   summarise(count = n()) %>% 
+#   pivot_wider(names_from = winner, values_from = count)
+
+mayor.table <- results %>% filter(str_detect(ward_name, "City of Milwaukee"), 
+                   race == "Milwaukee Mayor", 
+                   ! vote_choice %in% c("under_votes", "over_votes")) %>% 
+  inner_join(majority.group) %>%
+  group_by(majority) %>% 
+  mutate(total_votes = sum(votes)) %>% 
+  group_by(majority, vote_choice) %>% 
+  summarise(pct = (sum(votes)/first(total_votes))*100) %>% 
+  mutate(vote_choice = str_to_title(str_replace(vote_choice, "_", " "))) %>%
+  pivot_wider(names_from = vote_choice, values_from = pct) %>%
+  select(-`Write In`)
+
+exec.table <- results %>% filter(str_detect(ward_name, "City of Milwaukee"), 
+                   race == "Milwaukee County Executive", 
+                   ! vote_choice %in% c("under_votes", "over_votes")) %>% 
+  inner_join(majority.group) %>%
+  group_by(majority) %>% 
+  mutate(total_votes = sum(votes)) %>% 
+  group_by(majority, vote_choice) %>% 
+  summarise(pct = (sum(votes)/first(total_votes))*100) %>% 
+  mutate(vote_choice = str_to_title(str_replace(vote_choice, "_", " "))) %>%
+  pivot_wider(names_from = vote_choice, values_from = pct) %>%
+  select(-`Write In`)
+
+inner_join(mayor.table, exec.table) %>%
+  ungroup() %>%
+  mutate(majority = str_to_title(majority)) %>%
+  rename("Ward majority" = 1) %>%
+  kable(digits = 1, format = "html", caption = "Election results in City of Milwaukee wards by racial/ethnic majority group in ward") %>%
+  kable_styling(full_width = FALSE, bootstrap_options = c("striped")) %>%
+  add_header_above(c(" ", "Milwaukee Mayor" = 2, "Milwaukee County Exec" = 2))
+
+```
+
+
+## City Attorney
+
+The typically low-profile office of City Attorney wound up being an unusually interesting campaign. Challenger Tearman Spencer soundly defeated incumbent Grant Langley (first elected in 1984) by a vote of 61% to 39%. What's more, Spencer finished the campaign while fighting a case of COVID-19.
+
+The map below shows how Spencer racked up such a large margin of victory. He won the predominately African American north side of Milwaukee, the majority white neighborhoods along the Lake, and the majority Latino South Side. Langley only received a majority of the vote in the traditionally ethnic white far South, and Southwest Sides.
+
+```{r, warning=FALSE, message=FALSE, echo=FALSE, out.width= "60%", out.extra='style="float:right; padding:1px"', fig.width=6}
+map_table(thisrace = "City Attorney",
+                    winner = tearman_spencer,
+                    loser = grant_langley) %>%
+  tm_shape() +
+  tm_fill(col = "margin", palette = "PRGn", midpoint = 0, style = "cont",
+          showNA = F,
+          title = "Spencer minus Langley") +
+  tm_shape(aldermanic.boundaries) +
+  tm_polygons(alpha = 0) +
+  tm_layout(frame = FALSE, legend.outside = T,
+            main.title = "City Attorney",
+            fontfamily = "serif")
+```
+
+```{r, warning=FALSE, message=FALSE, echo=FALSE, out.width= "40%", out.extra='style="float:left; padding:0px"'}
+alder_results("City Attorney") %>%
+  select(1, "Spencer" = `Tearman Spencer`, "Langley" = `Grant Langley`) %>%
+  mutate_if(is.numeric, round, digits = 1) %>%
+  reactable(sortable = TRUE, striped = TRUE,
+            fullWidth = TRUE, compact = TRUE)
+```
+
+## City Comptroller
+
+The retirement of another longtime incumbent left the City Comptroller's seat open. Current Deputy Comptroller Aycha Sawa narrowly defeated State Legislator Jason Fields 50% to 49%.
+
+```{r, warning=FALSE, message=FALSE, echo=FALSE, out.width= "60%", out.extra='style="float:right; padding:1px"', fig.width=6}
+map_table(thisrace = "City Comptroller",
+                    winner = aycha_sawa,
+                    loser = jason_fields) %>%
+  tm_shape() +
+  tm_fill(col = "margin", palette = "PRGn", midpoint = 0, style = "cont",
+          showNA = F,
+          title = "Sawa minus Fields") +
+  tm_shape(aldermanic.boundaries) +
+  tm_polygons(alpha = 0) +
+  tm_layout(frame = FALSE, legend.outside = T,
+            main.title = "City Comptroller",
+            fontfamily = "serif")
+```
+
+```{r, warning=FALSE, message=FALSE, echo=FALSE, out.width= "40%", out.extra='style="float:left; padding:0px"'}
+alder_results("City Comptroller") %>%
+  select(1, "Sawa" = `Aycha Sawa`, "Fields" = `Jason Fields`) %>%
+  mutate_if(is.numeric, round, digits = 1) %>%
+  reactable(sortable = TRUE, striped = TRUE,
+            fullWidth = TRUE, compact = TRUE)
+```
+
+## City Treasurer
+
+The City Treasurer's race was a largely uneventful affair. The incumbent, Spencer Coggs, easily won reelection despite token opposition from challenger Brandon Methu, who won just 10 out of 324 wards.
+
+```{r, warning=FALSE, message=FALSE, echo=FALSE, out.width= "60%", out.extra='style="float:right; padding:1px"', fig.width=6}
+map_table(thisrace = "City Treasurer",
+                    winner = spencer_coggs,
+                    loser = brandon_methu) %>%
+  tm_shape() +
+  tm_fill(col = "margin", palette = "PRGn", midpoint = 0, style = "cont",
+          showNA = F,
+          title = "Coggs minus Methu") +
+  tm_shape(aldermanic.boundaries) +
+  tm_polygons(alpha = 0) +
+  tm_layout(frame = FALSE, legend.outside = T,
+            main.title = "City Treasurer",
+            fontfamily = "serif")
+```
+
+```{r, warning=FALSE, message=FALSE, echo=FALSE, out.width= "40%", out.extra='style="float:left; padding:0px"'}
+alder_results("City Treasurer") %>%
+  select(1, "Coggs" = `Spencer Coggs`, "Methu" = `Brandon Methu`) %>%
+  mutate_if(is.numeric, round, digits = 1) %>%
+  reactable(sortable = TRUE, striped = TRUE,
+            fullWidth = TRUE, compact = TRUE)
+```
+
+## MPS Referendum
+
+The most unifying issue on the ballot proved to be the Milwaukee Public Schools referendum to raise property taxes. It received 78% of the vote citywide and carried every aldermanic district with at least 61% of the vote. Only 2 wards in the entire city voted against it.
+
+```{r, warning=FALSE, message=FALSE, echo=FALSE, out.width= "60%", out.extra='style="float:right; padding:1px"', fig.width=6}
+map_table(thisrace = "MPS Referendum",
+                    winner = yes,
+                    loser = no) %>%
+  tm_shape() +
+  tm_fill(col = "margin", palette = "PRGn", midpoint = 0, style = "cont",
+          showNA = F,
+          title = "Yes minus No") +
+  tm_shape(aldermanic.boundaries) +
+  tm_polygons(alpha = 0) +
+  tm_layout(frame = FALSE, legend.outside = T,
+            main.title = "MPS Referendum",
+            fontfamily = "serif")
+```
+
+
+```{r, warning=FALSE, message=FALSE, echo=FALSE, out.width= "40%", out.extra='style="float:left; padding:0px"'}
+alder_results("MPS Referendum") %>%
+  select(1, "Yes" = Yes, "No" = No) %>%
+  mutate_if(is.numeric, round, digits = 1) %>%
+  reactable(sortable = TRUE, striped = TRUE,
+            fullWidth = TRUE, compact = TRUE)
+```
+
+There was little or no relationship between the share of households with a child at home and support for the MPS referendum. Support was basically the same in neighborhoods with few children as it was it neighborhoods where half of homes have kids.
+
+The number of Republican voters in a ward did have a remarkably strong negative correlation with support for the referendum. The MPS referendum's victory margin decline by about 2 points for every additional 1% increase in Republican primary participation.
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+orig.mps <- read_rds("~/Dropbox/Projects/2020/April/AprilElection/MilwaukeeCountyResults/MPS_results_with_Demographics.rds")
+
+gop <- read_rds("~/Dropbox/Projects/2020/April/AprilElection/DataForGOPvsMPSgraph.rds")
+mps.by.gop <- ggplot(gop, aes(pct_rep, mps_margin, size = ballots_total)) +
+  geom_point(alpha = 0.75) +
+  geom_smooth(method = "lm") +
+  scale_y_continuous(limits = c(-10,100), 
+                     labels = scales::percent_format(scale = 1, accuracy = 1),
+                     name = "MPS victory margin") +
+  scale_x_continuous(limits = c(0,50), 
+                     labels = scales::percent_format(scale = 1, accuracy = 1),
+                     name = "Share of votes cast in the Republican primary") +
+  labs(title = "of voters who voted in the GOP primary") +
+  ggthemes::theme_tufte() +
+  theme(legend.position = "none",
+        plot.title.position = "plot")
+
+mps <- orig.mps %>%
+  mutate(pct_with_kid = (households_with_kids/total_households)*100,
+         pct_yes = (yes/(yes + no))*100,
+         pct_no = (no/(yes + no))*100,
+         margin = pct_yes - pct_no,
+         pct_turnout = (ballots_total/reg_voters)*100,
+         pct_latino = (latino_householder/total_households)*100,
+         pct_white = (white_householder/total_households)*100,
+         pct_black = (black_householder/total_households)*100,
+         pct_asian = (asian_householder/total_households)*100)
+
+mps.by.kid <- ggplot(mps, aes(pct_with_kid, margin, size = ballots_total)) +
+  geom_point() +
+  scale_y_continuous(limits = c(-10,100), 
+                     labels = scales::percent_format(scale = 1, accuracy = 1),
+                     name = "MPS victory margin") +
+  scale_x_continuous(labels = scales::percent_format(scale = 1, accuracy = 1),
+                     name = "Share of households with a kid at home") +
+  labs(title = "of households with a kid") +
+  geom_smooth(method = "lm") +
+  ggthemes::theme_tufte() +
+  theme(legend.position = "none",
+        plot.title.position = "plot")
+
+library(patchwork)
+
+patchwork <- (mps.by.kid + mps.by.gop)
+
+patchwork + plot_annotation(
+  title = "Support for MPS referendum by share . . .",
+  subtitle = "Each dot is a ward in the City of Milwaukee"
+)
+
+```
+
+# Turnout
+
+The April 2020 election was extremely irregular. It took place during a global pandemic. Many thousands of citizens voted absentee, but serious problems were revealed with the postal service. Some ballots were never delivered. Others were delivered without postmarks. An unknown number were delivered too late or never delivered at all. By the time election day came around, the City of Milwaukee only offered 5 polling places. Voters waited in line for hours. Anectdotal reports in the [*New York Times*](https://www.nytimes.com/2020/04/07/us/politics/wisconsin-democratic-voters.html) suggest suburban voters experienced essential no disruptions.
+
+A full accounting of voter turnout will have to wait, but the table and map below display voter turnout rates, as a share of registered voters, in the Spring 2020 election. Turnout was highest in Whitefish Bay and Bayside, both of which mailed an absentee ballot application to each registered voter in their boundaries. Turnout in these two communities was double that of the City of Milwaukee, where only 32% of registered voters cast a ballot.
+
+```{r, warning=FALSE, message=FALSE, echo=FALSE, out.width= "60%", out.extra='style="float:right; padding:1px"', fig.width=6}
+inner_join(reporting.units,
+           results %>%
+  group_by(ward_name, reporting_unit_id = ward_number, reg_voters, ballots_total, ballots_dem, ballots_rep) %>%
+  summarise() %>%
+  mutate(turnout = (ballots_total/reg_voters)*100)) %>%
+  tm_shape() +
+  tm_fill(col = "turnout", style = "cont", palette = "BuGn") +
+  tm_shape(mcd.boundaries) +
+  tm_polygons(alpha = 0) +
+  tm_layout(frame = FALSE, legend.outside = T,
+            main.title = "Turnout as a share of reg. voters",
+            fontfamily = "serif")
+```
+
+```{r, warning=FALSE, message=FALSE, echo=FALSE, out.width= "40%", out.extra='style="float:left; padding:0px"'}
+results %>%
+  group_by(ward_name, reporting_unit_id = ward_number, reg_voters, ballots_total, ballots_dem, ballots_rep) %>%
+  summarise() %>%
+    separate(ward_name, into = c("municipality", "drop"),
+             sep = " Ward") %>%
+    mutate(municipality = str_replace(municipality, "City of", "C."),
+           municipality = str_replace(municipality, "Village of", "V."),
+           municipality = str_replace(municipality, "Town of", "T.")) %>%
+    group_by(municipality) %>%
+  summarise(turnout = (sum(ballots_total)/sum(reg_voters))*100) %>%
+  mutate_if(is.numeric, round, digits = 1) %>%
+  reactable(sortable = TRUE, striped = TRUE,
+            fullWidth = TRUE, compact = TRUE)
+```

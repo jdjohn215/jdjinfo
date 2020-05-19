@@ -1,0 +1,108 @@
+---
+title: A case study on the limitations of maps
+author: John D. Johnson
+date: '2020-01-17'
+slug: greater-milwaukee-voting-trends
+categories:
+  - Milwaukee
+  - Elections
+tags: []
+Description: ''
+Tags: []
+Categories: []
+DisableComments: no
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(tidyverse)
+library(sf)
+library(tmap)
+
+votes <- readRDS("~/Dropbox/Projects/2020/January/MKEarea_Election_Maps/data/MilwaukeeAreaVotes.rds") %>%
+  mutate(margin = DEM-REP)
+d.votes <- votes %>% st_set_geometry(NULL)
+ward.avg.vote <- d.votes %>%
+  group_by(GEOID, CNTY_FIPS, CNTY_NAME, MCD_NAME) %>%
+  summarise_if(is.numeric, mean)
+municipality <- votes %>%
+  st_set_geometry(NULL) %>%
+  group_by(MCD_NAME, CTV, race, year) %>%
+  summarise(total = sum(total),
+            dem = (sum(DEM)/total)*100,
+            rep = (sum(REP)/total)*100) %>%
+  ungroup()
+county <- votes %>%
+  st_set_geometry(NULL) %>%
+  group_by(CNTY_NAME, race, year) %>%
+  summarise(total = sum(total),
+            dem = (sum(DEM)/total)*100,
+            rep = (sum(REP)/total)*100) %>%
+  ungroup()
+municipality.avg <- municipality %>%
+  group_by(MCD_NAME, CTV) %>%
+  summarise(dem = mean(dem),
+            rep = mean(rep),
+            votes = mean(total))
+mke.map <- votes %>% group_by(GEOID) %>% filter(row_number() == 1)
+margin.palette <- c("#67000D", "#BD1919", "#F5735F", 
+                    "#A1DBF7", "#4697E0", "#08306B")
+```
+
+The Milwaukee metro area is quite possibly the most politically segregated metropolis in the United States.[^1] This is part-and-parcel an outcome of the region's extreme racial segregation. Depending on the story you want to tell, it's easy to find statistics to spin in the direction you want. But even if you aren't trying to spin the facts, it's difficult to find a short way to tell the whole story.
+
+Consider these two ways of mapping elections. The first uses a 6-category binned color palette. The second uses a continuous color scheme. Both reveal useful patterns, but obscure others. And, of course, both maps have the inevitable fundamental flaw of all choropleth maps--land does not equal people.
+
+```{r, warning=FALSE, message=FALSE}
+tm_shape(mke.map) +
+  tm_polygons(alpha = 0) +
+  tm_shape(votes) +
+  tm_fill(col = "pdem", palette = "RdBu",
+          breaks = c(-Inf, 30, 40, 50, 60, 70, Inf),
+          labels = c("70+% GOP", "60-69% GOP", "50-59% GOP",
+                     "50-59% DEM.", "60-69% DEM.", "70+% DEM."),
+          title = "2-party %") +
+  tm_facets(by = "racename", ncol = 2, nrow = 2) +
+  tm_layout(frame = F, fontfamily = "serif",
+            main.title = "Elections in the Milwaukee Metro Area",
+            legend.outside = TRUE)
+```
+
+
+```{r, warning=FALSE, message=FALSE}
+tm_shape(mke.map) +
+  tm_polygons(alpha = 0) +
+  tm_shape(votes) +
+  tm_fill(col = "pdem", palette = "RdBu",
+          style = "cont",
+          title = "2-party %") +
+  tm_facets(by = "racename", ncol = 2, nrow = 2) +
+  tm_layout(frame = F, fontfamily = "serif",
+            main.title = "Elections in the Milwaukee Metro Area",
+            legend.outside = TRUE)
+```
+
+I think the binned data does a better job communicating how polarized the region is. The WOW counties are genuinely very Republican. The dark red colors on the binned map do a better job of showing the heavily Republican nature of the suburbs than the washed out reds in the continuous map. On the other hand, they suggest symmetry with the City that doesn't exist. While solidly Republican, the suburbs *are not* as uniformly partisan as vast swathes of Milwaukee proper.
+
+There are 16 wards (with at least 10 voters) in the suburbs which average 80% or more of the vote for Republican candidates. There are 189 such Democratic-leaning wards. Republicans in the suburbs are much more likely to have Democratic neighbors than the inverse of Democrats in the city. The continuous map captures this asymmetry well.
+
+Here is one more version of the map. In some respects, this is the most accurate map. It simply shows the raw vote margin--how many votes the winner got--in each ward using a continuous color scale. This helps to even out the overrepresentation of highly Republican but sparsely-populated rural areas, but the changes from one election to another are not obvious in this map. 
+
+This emphasizes an important point. In reality, the voting changes from one election to the next, even when electorally significant, are usually pretty small. But we don't look at election maps to be reminded of that. We look at maps to see the places where change happened. Because of this, the most descriptively accurate maps are often the least informative.
+
+```{r, warning=FALSE, message=FALSE}
+tm_shape(mke.map) +
+  tm_polygons(alpha = 0) +
+  tm_shape(votes) +
+  tm_fill(col = "margin", palette = "RdBu",
+          style = "cont",
+          title = "vote margin",
+          labels = c("+500 GOP", "0", "+500 DEM.",
+                     "+1,000 DEM.", "+1,500 DEM.")) +
+  tm_facets(by = "racename", ncol = 2, nrow = 2) +
+  tm_layout(frame = F, fontfamily = "serif",
+            main.title = "Elections in the Milwaukee Metro Area",
+            legend.outside = TRUE)
+```
+
+[^1]: See [this excellent bit of reporting by Craig Gilbert](http://archive.jsonline.com/news/statepolitics/democratic-republican-voters-worlds-apart-in-divided-wisconsin-b99249564z1-255883361.html/) and funded by my employer, the Marquette Law School.

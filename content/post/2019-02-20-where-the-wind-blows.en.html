@@ -1,0 +1,95 @@
+---
+title: Where the wind blows
+author: John D. Johnson
+date: '2019-02-20'
+slug: where-the-wind-blows
+categories:
+  - Milwaukee
+tags: []
+Description: ''
+Tags: []
+Categories: []
+DisableComments: no
+---
+
+
+
+<p>The wind in Milwaukee is strongly affected by Lake Michigan. When the sun sets and land temperatures cool, the wind often blows from the east. During the day the land heats up and the reverse happens.</p>
+<p><a href="http://hint.fm/wind/"><strong>You can see an amazing live visualization of the wind here</strong></a></p>
+<p>I wanted to see how the wind varies by time of day, so I made this series of small multiples using hourly weather records from NOAA. To download a full size version <a href="https://drive.google.com/open?id=1Vd1XWqaD6sHSrQkFMNuI70qD3QIyJ4_c">click here</a>.</p>
+<p><img src="/post/2019-02-20-where-the-wind-blows.en_files/Hour_facets.png" /></p>
+<p>You can make the graph yourself using the following code.</p>
+<pre class="r"><code>library(tidyverse)
+library(labelled)
+
+# you can make the range of years anything you want
+years &lt;- 2008:2018
+d.years &lt;- list()
+
+
+for(i in seq_along(years)){
+  d &lt;- read_csv(paste0(&quot;https://www.ncei.noaa.gov/data/global-hourly/access/&quot;,
+                       years[i], &quot;/72640014839.csv&quot;),
+                col_types = cols(.default = &quot;c&quot;))
+  d &lt;- d %&gt;%
+    select(STATION, DATE, WND) %&gt;%
+    separate(col = &quot;WND&quot;, sep = &quot;,&quot;, convert = F,
+             into = c(&quot;angle&quot;, &quot;angle_code&quot;, &quot;type_code&quot;, &quot;speed&quot;,
+                      &quot;speed_code&quot;)) %&gt;%
+    mutate(speed = replace(speed, speed == 9999, NA),
+           angle = replace(angle, angle == 999, NA)) %&gt;%
+    separate(col = &quot;DATE&quot;, into = c(&quot;date&quot;,&quot;time&quot;), sep = &quot;T&quot;) %&gt;%
+    separate(col = &quot;time&quot;, sep = &quot;:&quot;, into = c(&quot;hour&quot;,&quot;minute&quot;,&quot;second&quot;),
+             remove = F, convert = F) %&gt;%
+    select(-second)
+  
+  d.years[[i]] &lt;- d
+  rm(d)
+}
+
+wind &lt;- bind_rows(d.years)
+
+wind2 &lt;- wind %&gt;%
+  mutate(angle = as.numeric(as.character(angle)),
+         hour = as.numeric(as.character(hour)),
+         minute = as.numeric(as.character(minute)))
+
+wind3 &lt;- wind2 %&gt;%
+  mutate(hour2 = hour, 
+         hour2 = replace(hour2, minute &gt; 30, hour[minute &gt; 30] + 1),
+         hour2 = replace(hour2, hour2 == 24, 0),
+         category = cut(angle, breaks = c(seq(0, 360, by = 10)))) %&gt;%
+  filter(!is.na(angle)) %&gt;%
+  group_by(hour2) %&gt;%
+  mutate(observations = n()) %&gt;%
+  group_by(hour2, category) %&gt;%
+  summarise(pct = n()/first(observations)) %&gt;%
+  ungroup() %&gt;%
+  set_value_labels(hour2 = c(&quot;midnight&quot; = 0, &quot;1am&quot; = 1, &quot;2am&quot; = 2, &quot;3am&quot; = 3,
+                             &quot;4am&quot; = 4, &quot;5am&quot; = 5, &quot;6am&quot; = 6, &quot;7am&quot; = 7,
+                             &quot;8am&quot; = 8, &quot;9am&quot; = 9, &quot;10am&quot; = 10, &quot;11am&quot; = 11,
+                             &quot;noon&quot; = 12, &quot;1pm&quot; = 13, &quot;2pm&quot; = 14, &quot;3pm&quot; = 15,
+                             &quot;4pm&quot; = 16, &quot;5pm&quot; = 17, &quot;6pm&quot; = 18, &quot;7pm&quot; = 19,
+                             &quot;8pm&quot; = 20, &quot;9pm&quot; = 21, &quot;10pm&quot; = 22, &quot;11pm&quot; = 23)) %&gt;%
+  mutate(hour2 = to_factor(hour2))
+
+
+by.hour &lt;- ggplot(wind3, aes(category, pct)) +
+  geom_histogram(stat = &quot;identity&quot;) +
+  coord_polar(theta = &quot;x&quot;) +
+  facet_wrap(facets = vars(hour2),
+             nrow = 3) +
+  labs(title = &quot;Where does the wind blow?&quot;,
+       subtitle = &quot;Wind direction reported hourly from General Mitchell Airport in Milwaukee, WI from 2008-2018&quot;,
+       caption = paste(&quot;Source: NOAA, hourly reports. The size and length of&quot;, 
+                       &quot;each bar represents the percent of days reporting wind&quot;, 
+                       &quot;blowing from that direction.&quot;)) +
+  theme_bw(base_family = &quot;serif&quot;) +
+  theme(axis.text = element_blank(),
+        axis.ticks = element_blank(),
+        axis.title = element_blank(),
+        panel.grid = element_blank(),
+        panel.background = element_rect(fill = &quot;linen&quot;),
+        panel.border = element_blank(),
+        strip.background = element_rect(fill = &quot;linen&quot;,
+                                        colour = &quot;linen&quot;))</code></pre>

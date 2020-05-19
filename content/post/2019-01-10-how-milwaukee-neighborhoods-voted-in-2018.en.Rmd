@@ -1,0 +1,97 @@
+---
+title: How Milwaukee neighborhoods voted in 2018
+author: John D. Johnson
+date: '2019-01-10'
+slug: how-milwaukee-neighborhoods-voted-in-2018
+categories:
+  - Milwaukee
+  - Elections
+tags: []
+Description: ''
+Tags: []
+Categories: []
+DisableComments: no
+---
+
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(sf)
+library(tmap)
+library(kableExtra)
+rvs <- readxl::read_excel("~/Dropbox/Projects/RegVoters18/1Dec2018/registeredvotersbyward_12_01_2018_xlsx_22779.xlsx") %>%
+  filter(Hindi == "41251") %>%
+  mutate(WARDID = str_pad(word(ward, -1), width = 4, pad = "0", side = "left")) %>%
+  select(WARDID, reg = `Voter Count`)
+
+ltsb <- st_read("~/Dropbox/Projects/elections/20122020_Election_Data_with_2018_Wards/2012_2020_Election_Data_with_2018_Wards.shp") %>%
+  filter(MCD_FIPS == "5507953000") %>%
+  select(GEOID, WARDID, GOVDEM18, GOVREP18, GOVTOT18) %>%
+  mutate(margin = ((GOVDEM18/GOVTOT18) - (GOVREP18/GOVTOT18))*100) %>%
+  left_join(rvs) %>%
+  mutate(turnout = (GOVTOT18/reg)*100)
+
+nhoods <- read_csv("~/dropbox/projects/wisconsinnov2018/map/VoteByNeighborhood.csv")
+```
+
+Everyone knows Milwaukee is an overwhelmingly Democratic city. In last November's race for governor, Tony Evers defeated Scott Walker 78% to 20% within city limits. But this statistic alone obscures two other facts. First, Democratic support is not evenly spread across the city, and second, lots of Republican voters still live within city limits. 
+
+### Partisan trends
+This ward-level map shows Tony Evers' vote margin (Evers' percentage minus Walker's percentage).
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.align='center', fig.cap="Evers' margin of victory, November 2018"}
+tm_shape(ltsb) +
+  tm_fill(col = "margin", breaks = c(-10,0,10,20,30,40,50,60,70,80,90,Inf),
+          palette = "RdBu") +
+  tm_layout(legend.outside = T, frame = F, fontfamily = "serif")
+```
+
+Many of the city's African-American neighborhoods on the north side are overwhelmingly Democratic, with Evers defeating Walker by 90%+. Moving away from those neighborhoods, the vote begins to vary. There are additional concentrations of Democratic voters on the South Side, but the Democratic margins taper off in the southeast.
+
+Evers won the average Milwaukee neighborhood by 54%. Nineteen of Milwaukee's neighborhoods were decided by single digits. Seventeen went to the Democrats by more than 90%.
+
+```{r, echo=FALSE, fig.align='center'}
+ggplot(nhoods, aes(margin)) +
+  geom_histogram(bins = 30) +
+  scale_x_continuous(labels = scales::percent,
+                     name = "Evers minus Walker") +
+  labs(title = "2018 Vote for governor in Milwaukee neighborhoods") +
+  theme_bw(base_family = "serif")
+```
+
+The most Democratic neighborhood in the city was Arlington Heights (between Capitol and Keefe just west of I-94). Evers won it by 96%. The most Republican neighborhood was Morgan Heights on the city's far south-western extension. Walker carried it by 3%.
+
+### Turnout
+
+```{r, echo=FALSE, fig.align='center'}
+ggplot(nhoods, aes(turnout)) +
+  geom_histogram(bins = 30) +
+  scale_x_continuous(labels = scales::percent) +
+  labs(title = "2018 turnout as a share of registered voters") +
+  theme_bw(base_family = "serif")
+```
+
+Turnout also varied considerably. The lowest was 47% of registered voters in the Marquette neighborhood. That's not particularly surprising given that most of the residents are students. The highest turnout (88%) came in the small, secluded neighborhood of Pigsville, which is tucked between Miller Park and Miller Valley. In general turnout was lower in poor neighborhoods and higher in the wealthier neighborhoods along the lakeshore to the east and the suburbs inland.
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.align='center', fig.cap="Turnout as a share of registered voters, November 2018"}
+tm_shape(ltsb) +
+  tm_fill(col = "turnout", breaks = c(-Inf, 50, 55, 60, 65, 70,
+                                      75, 80, 85, 90, Inf),
+          palette = "GnBu") +
+  tm_layout(legend.outside = T, frame = F, fontfamily = "serif")
+```
+
+### Results by neighborhood
+Here's a table with the election results for each neighborhood.
+
+```{r, echo=FALSE}
+nhoods %>%
+  mutate(Neighborhood = str_to_title(NEIGHBORHD),
+         Evers = round(dem, digits = 0),
+         Walker = round(rep, digits = 0),
+         Total = round(total, digits = 0),
+         `Reg Voters` = round(reg, digits = 0),
+         Margin = round((margin*100), digits = 1)) %>%
+  select(Neighborhood, Evers, Walker, Total, `Reg Voters`, `Evers minus Walker` = Margin) %>%
+  reactable::reactable(filterable = TRUE, fullWidth = FALSE)
+```

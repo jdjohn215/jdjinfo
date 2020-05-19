@@ -1,0 +1,177 @@
+---
+title: How church attendance affects Trump support
+author: John D. Johnson
+date: '2020-01-23'
+slug: how-church-attendance-affects-trump-support
+categories:
+  - Public opinion
+  - Wisconsin
+tags: []
+Description: ''
+Tags: []
+Categories: []
+DisableComments: no
+---
+
+```{r setup, include=FALSE}
+library(knitr)
+library(tidyverse)
+library(MLSPTools)
+
+integ <- readRDS("~/Dropbox/Mulawpoll1/integcurrent.rds")
+
+d <- integ %>% filter(zendyyyy > 2017) %>%
+  mutate(attend2 = NA,
+         attend2 = replace(attend2, af2 %in% c(1:3), "Monthly+"),
+         attend2 = replace(attend2, af2 %in% c(4:6), "Few times a year or less"),
+         attend2 = factor(attend2, levels = c("Monthly+", "Few times a year or less")))
+
+ctab <- moe_crosstab_3way(d, attend2, g40v2, zreligion5) %>%
+  filter(! g40v2 %in% c("Don't know", "Refused"),
+         ! zreligion5 %in%  c("DK/NA/Ref", "Other religion"))
+
+significant <- ctab %>%
+  mutate(min = (pct - moe),
+         max = (pct + moe),
+         attend2 = as.character(attend2),
+         attend2 = replace(attend2, attend2 == "Monthly+", "more"),
+         attend2 = replace(attend2, attend2 != "more", "less")) %>%
+  select(zreligion5, attend2, g40v2, min, max, pct) %>%
+  pivot_longer(cols = c(min, max, pct)) %>%
+  pivot_wider(names_from = c(attend2, name), values_from = value) %>%
+  mutate(significant = (more_min > less_max | more_max < less_min)) %>%
+  filter(significant == TRUE) %>%
+  select(-ends_with("min"), -ends_with("max")) %>%
+  mutate(diff = more_pct - less_pct)
+
+moe_crosstab(d, attend2, g40v2, format = "long") %>%
+  mutate(min = (pct - moe),
+         max = (pct + moe),
+         attend2 = as.character(attend2),
+         attend2 = replace(attend2, attend2 == "Monthly+", "more"),
+         attend2 = replace(attend2, attend2 != "more", "less")) %>%
+  select(attend2, g40v2, min, max, pct) %>%
+  pivot_longer(cols = c(min, max, pct)) %>%
+  pivot_wider(names_from = c(attend2, name), values_from = value) %>%
+  mutate(significant = (more_min > less_max | more_max < less_min)) %>%
+  filter(significant == TRUE) %>%
+  select(-ends_with("min"), -ends_with("max")) %>%
+  mutate(diff = more_pct - less_pct)
+
+attend.plot <- ggplot(ctab,
+                      aes(x = g40v2, y = pct, ymin = (pct - moe), 
+                          ymax = (pct + moe), color = attend2)) +
+  geom_pointrange(position = position_dodge(width = 0.25),
+                  fatten = 3) +
+  ggrepel::geom_text_repel(aes(label = round(pct)),
+                           point.padding = 0.25, family = "serif",
+                           size = 3) +
+  scale_x_discrete(labels = function(x){str_wrap(x, width = 10)},
+                   name = "Trump job approval") +
+  scale_y_continuous(labels = scales::percent_format(scale = 1),
+                     name = NULL) +
+  facet_wrap(facets = vars(zreligion5)) +
+  labs(title = "How church attendance affects Trump approval among different religious groups",
+       subtitle = "Marquette Law Poll, 2018-2020",
+       caption = "n = 11,833") +
+  guides(color = guide_legend(title = "frequency of attendance:")) +
+  ggthemes::theme_tufte() +
+  theme(legend.position = "top",
+        panel.background = element_rect(fill = "linen",
+                                        colour = "linen"),
+        strip.background = element_rect(fill = "linen",
+                                        colour = "linen"),
+        panel.grid = element_line(colour = "white"))
+
+attendance.by.religion <- crosstab(d, zreligion5, attend2)
+
+attend.approve <- moe_crosstab(d, af2, g40, format = "long") %>%
+  filter(! g40 %in% c("Don't know", "Refused"),
+         ! af2 %in% c("Don't know", "Refused")) %>%
+  ggplot(aes(x = af2, y = pct, ymin = (pct - moe), ymax = (pct + moe),
+             color = g40, group = g40)) +
+  geom_line(size = 1.2) +
+  geom_pointrange(position = position_dodge(width = 0.25),
+                  fatten = 3) +
+  ggrepel::geom_text_repel(aes(label = round(pct)),
+                           point.padding = 0.25, family = "serif",
+                           size = 3) +
+  scale_x_discrete(name = "Church attendance") +
+  scale_y_continuous(labels = scales::percent_format(scale = 1),
+                     name = NULL) +
+  labs(title = "How church attendance affects Trump approval",
+       subtitle = "Marquette Law Poll, 2018-2020",
+       caption = "n = 12,000") +
+  guides(color = guide_legend(title = "Trump approval:")) +
+  ggthemes::theme_tufte() +
+  theme(legend.position = "top",
+        panel.background = element_rect(fill = "linen",
+                                        colour = "linen"),
+        strip.background = element_rect(fill = "linen",
+                                        colour = "linen"),
+        panel.grid = element_line(colour = "white"))
+
+d.model <- d %>%
+  filter(zpid3 != 9,
+         g40 %in% c(1:2),
+         af2 < 8) %>%
+  mutate(partyID3 = as.numeric(zpid3) - 2,
+         TrumpApprove = 0,
+         TrumpApprove = replace(TrumpApprove, g40 == 1, 1),
+         ChurchAttend = 0,
+         ChurchAttend = replace(ChurchAttend, af2 %in% c(1:3), 1),
+         # catholic dummy
+         Catholic = 0,
+         Catholic = replace(Catholic, zreligion5 == 3, 1),
+         # mainline dummy
+         Mainline = 0,
+         Mainline = replace(Mainline, zreligion5 == 2, 1),
+         # evangelical dummy
+         Evangelical = 0,
+         Evangelical = replace(Evangelical, zreligion5 == 1, 1))
+trump.approve.model <- lm(TrumpApprove ~ ChurchAttend + partyID3, data = d.model, weights = zwave_weight)
+```
+
+Churchgoing Wisconsinites are more likely to approve of Trump's job performance than their less observant peers. Although some individual steps are within the margin of error[^1], the trend is monotonic. People who go to church more than once a week approve of Trump more than those who go only weekly; they in turn support Trump more than people who only go once or twice a month, and so on.
+
+```{r, echo=FALSE, fig.align='center'}
+attend.approve
+```
+
+Wisconsin registered voters who go to church at least once a month are 12% more likely to strongly approve of Trump's job performance than those who don't. These regular churchgoers are 18% *less* likely to say they strongly disapprove of Trump.
+
+This in itself probably won't surprise anyone. After all, Trump's support is famously concentrated among evangelical Christians who have very high levels of church attendance.[^2] Three-fourths of self-described "born-again or evangelical" Christians report attending at least once a month, compared with 55% of Catholics and 48% of Mainline Protestants.
+
+But church attendance correlates with greater support for Trump (or less disapproval, at least) among all three of these groups. In fact, Trump support increases in a statistically significant way even for the tiny faction of non-religious people who attend church regularly.[^3]
+
+To measure this question, I combined all 14 [Marquette University Law School Polls](https://law.marquette.edu/poll/category/results-and-data/) fielded from January 2018 to January 2020, and I recoded church attendance into two categories--people who report going to church once a month or more and people who attend church only a few times a year, seldom, or never.[^4] Using this large pool of responses, I compared the relationship between church attendance and Trump approval among each of these religious groups: Born-again or evangelical Christians, Mainline Protestants, Roman Catholics, and those professing no religion. Respectively, these represent 18%, 25%, 28%, and 17% of Wisconsin's registered voters.
+
+Here are the results. The vertical lines around each dot show the 95% confidence interval. For example, 47% of born again Protestants who go to church at least monthly strongly approve of Trump's job performance. Fewer (42%) of less-frequent evangelical attenders strongly approve of Trump, but this difference is not statistically significant.
+
+```{r, echo=FALSE, fig.align='center'}
+attend.plot
+```
+
+Here are the statistically significant results.
+
+* Evangelicals who go to church less than once a month are more likely to strongly disapprove of Trump than their more regularly attending counterparts. Difference: 8%.
+* Mainline Protestants who go to church regularly are *more* likely (+5%) to somewhat approve of Trump and *less* likely (-10%) to strongly disapprove of Trump than Mainliners who don't go to church much.
+* Churchgoing Catholics are more likely to strongly approve of Trump (+8%) and less likely to strongly disapprove of him (-11%) than less-attending Catholics.
+* Non-religious people who still go to church regularly are more likely to somewhat approve of Trump (+12%) and less likely to strongly disapprove of him (-25%) than non-religious people who avoid church.
+
+### What about partisanship?
+Maybe churchgoers of all these different orientations are just more likely to be Republicans. To test this, I ran the regression model below. The base category is self-described Independents who go to church less than once a month, if at all. The independent variable, `partyID3`, is coded `-1` for Republicans, `0` for Independents, and `1` for Democrats. `ChurchAttend` is coded `1` if people attend church at least once a month.
+
+According to this model, we expect 43% of Independents who don't go to church to approve of Trump. Going to church at least once per month correlates with a 7% increase in Trump approval, regardless of party ID.
+
+<div align="center"> 
+```{r, echo=FALSE, results='asis'}
+stargazer::stargazer(trump.approve.model, type = "html",
+                     title = "Trump approval ~ Church Attendance + Party Identification")
+```
+</div>
+
+[^1]: All statistics are for registered voters. All statistics discussed are statistically significant with 95% confidence unless otherwise noted.
+[^2]: We define "evangelicals" as those who answer yes to "Would you describe yourself as a 'born-again' or evangelical Christian, or not?" We do not ask Roman Catholics or non-Christians this question.
+[^3]: Six percent of people who say they have "no religion" still claim to go to church at least once a month.
+[^4]: Trump's approval rating was very stable during this period, never climbing above 48% or falling below 42%.

@@ -1,0 +1,98 @@
+---
+title: Milwaukee's 2020 property assessments take their largest jump since 2006
+author: John D. Johnson
+date: '2020-04-28'
+slug: milwaukee-s-2020-property-assessments-take-their-largest-jump-since-2006
+categories:
+  - Milwaukee
+  - Housing
+tags: []
+Description: ''
+Tags: []
+Categories: []
+DisableComments: no
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(knitr)
+library(tidyverse)
+library(gt)
+library(reactable)
+
+assessments <- read_csv("~/Dropbox/Projects/2020/April/Assessments2020/data/MilwaukeeAnnualTaxBase_real_dollars.csv") %>%
+  mutate(annual_change = (`2020 dollars` - lag(`2020 dollars`, 1)),
+         annual_pct_change = ((`2020 dollars` - lag(`2020 dollars`, 1))/lag(`2020 dollars`, 1))*100)
+total2020 <- assessments$`2020 dollars`[assessments$year==2020]
+total2019 <- assessments$`2020 dollars`[assessments$year==2019]
+pct.change.19.to.20 <- ((total2020-total2019)/total2019)*100
+peak.year <- assessments$year[assessments$`2020 dollars` == max(assessments$`2020 dollars`)]
+total.peak <- assessments$`2020 dollars`[assessments$year==peak.year]
+
+new.property.summary <- read_rds("~/Dropbox/Projects/2020/April/Assessments2020/data/NewPropertySummary.rds")
+annual.type.avg <- read_rds("~/Dropbox/Projects/2020/April/Assessments2020/data/AnnualAverageHomeValuesByType.rds")
+neighborhood.stats <- read_rds("~/Dropbox/Projects/2020/April/Assessments2020/data/NeighborhoodStatistics.rds") %>%
+  mutate_if(is.numeric, round) %>%
+  mutate(Neighborhood = str_to_title(Neighborhood))
+```
+
+The 2020 total value of Milwaukee's tax base is $31.4 billion, up $2.2 billion from 2019, but still $4.1 billion less than the peak in `r peak.year`. The city's total assessment grew `r round(pct.change.19.to.20, 1)`% from 2019 to 2020. This is the largest year-over-year increase since 2005-2006.
+
+Unless stated otherwise, all values in this post are adjusted for inflation to current (2020) values using the [Consumer Price Index](https://fred.stlouisfed.org/series/CPIAUCSL).
+
+In unadjusted ("nominal") dollars, the city's total 2020 valuation exceeded its 2008 peak for the first time. Homeowners who bought their properties near the top of the pre-Recession market will be glad to see their home values approach the sale price, but apart from this the nominal dollar comparison has little value.
+
+```{r}
+caption.text <- paste("Data from the City Assessor's Master Property File.",
+                      "2020 values may change as assessments are contested.",
+                      "Values are adjusted for inflation using the Consumer Price Index.")
+ggplot() +
+  geom_line(data = assessments, aes(year, unadjusted, color = "Unadjusted dollars"),
+            color = "blue", size = 2) +
+  geom_line(data = assessments, aes(year, `2020 dollars`, color = "2020 real dollars"),
+            color = "black", size = 2) +
+  xlab(NULL) +
+  scale_y_continuous(labels = scales::number_format(big.mark = ",",
+                                                    prefix = "$"),
+                     name = NULL) +
+  annotate("label", x = 2015, y = 32500000000, color = "black",
+           label = "inflation adjusted,\n2020 dollars", fontface = "bold") +
+  annotate("label", x = 2015, y = 20000000000, color = "blue",
+           label = "not adjusted,\nnominal dollars", fontface = "bold") +
+  labs(title = "Total assessed value of Milwaukee's property tax base",
+       caption = str_wrap(caption.text)) +
+  MLSPTools::theme_MLSP()
+```
+
+By law, the assessments released in April 2020 are intended to reflect the value of the property on January 1, 2020, so they do not take into consideration the current economic turmoil facing the entire nation. As research from the [Public Policy Forum](https://wispolicyforum.org/research/the-covid-19-fiscal-fall-out-for-cities-and-villages/) has shown, municipalities in Wisconsin are disproportionately dependent on property taxes compared to local governments in other states. Usually this lack of a diversified income stream is a bad thing, but in this case it may shelter municipalities from even worse fiscal fallout for at least another year.
+
+## The residential picture
+
+The average residential property assessment in 2020 was $115,700. The median home's assessment grew 9.9% from 2019 to 2020, or $9,800. Home valuations increased for 82% of homes and decreased for 12%.
+
+Among neighborhoods with at least 200 homes, values grew the most in Brewer's Hill ($46,000 on average). Murray Hill, on the other side of the Milwaukee River, saw the largest decline ($9,000). Other neighborhoods with large increases include  Harambee, Mount Mary, Maple Tree, and Riverwest. In addition to Murray Hill, property values declined in Riverside Park, Uptown, Clock Tower Acres, Granville Station, Washington Park, and Sherman Park.
+
+There are a handful of neighborhoods where property values in 2020 are higher than in 2007. They include neighborhoods near the Lake such as Bay View, Fernwood, Harbor View, the Historic Third Ward, and Yankee Hill; the two near-north side neighborhoods of Triangle and Triangle North; and a cluster of far-northwest side developments near Dretzka Park.
+
+These neighborhoods are by far the exception to the general trend. As of 2020, the median home in Milwaukee is assessed at 73% of it's value in 2007--an average decline of $42,000.
+
+![](/post/2020-04-28-milwaukee-s-2020-property-assessments-take-their-largest-jump-since-2006.en_files/BothMaps.png)
+
+
+The following table shows the median value of residential properties by neighborhood for selected years. "Residential properties" does not include apartment buildings with more than four units.
+
+```{r, fig.align='center'}
+reactable(neighborhood.stats, sortable = TRUE, filterable = TRUE,
+          columns = list(
+            properties = colDef(format = colFormat(separators = TRUE)),
+            `2000` = colDef(format = colFormat(prefix = "$", separators = TRUE, digits = 0)),
+            `2007` = colDef(format = colFormat(prefix = "$", separators = TRUE, digits = 0)),
+            `2019` = colDef(format = colFormat(prefix = "$", separators = TRUE, digits = 0)),
+            `2020` = colDef(format = colFormat(prefix = "$", separators = TRUE, digits = 0))
+          ),
+          columnGroups = list(
+            colGroup(name = "Median value in inflation-adjusted dollars",
+                     columns = c("2000", "2007", "2019", "2020"))
+          ),
+          striped = TRUE)
+```

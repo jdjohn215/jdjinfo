@@ -1,0 +1,68 @@
+baseURL = "https://www.johndjohnson.info"
+languageCode = "en"
+DefaultContentLanguage = "en"
+title = "Website of John Johnson"
+theme = "anatole"
+summarylength = 10
+enableEmoji = true
+
+# Enable Disqus
+#disqusShortname = ""
+
+# Google Analytics
+#googleAnalytics = "UA-123-45"
+
+ignoreFiles = ["\\.Rmd$", "\\.Rmarkdown$", "_files$", "_cache$"]
+
+[params]
+title = "John D. Johnson"
+author = "John D. Johnson"
+description = "public opinion, elections, demographics, housing; some RStats too"
+profilePicture = "images/logo.png"
+keywords = ""
+favicon = "favicons/"
+customCss = []
+mainSections = ["post"]
+
+## Math settings
+[params.math]
+enable = false  # options: true, false. Enable math support globally, default: false. You can always enable math on per page.
+use = "katex"  # options: "katex", "mathjax". default is "katex".
+
+## Social links
+[[params.socialIcons]]
+icon = "fa-github"
+title = "GitHub"
+url = "https://github.com/jdjohn215/"
+
+[[params.socialIcons]]
+icon = "fa-twitter"
+title = "Twitter"
+url = "https://twitter.com/jdjmke"
+
+[[params.socialIcons]]
+icon = "fa-envelope"
+title = "e-mail"
+url = "mailto:jdjohn215@gmail.com"
+
+## Menu items
+
+[menu]
+
+  [[menu.main]]
+  name = "About"
+  weight = 100
+  identifier = "about"
+  url = "/about/"
+
+  [[menu.main]]
+  name = "Posts"
+  weight = 200
+  identifier = "posts"
+  url = "/post/"
+  
+  [[menu.main]]
+  name = "Feed"
+  identifier = "Feed"
+  weight = 300
+  url = "/"

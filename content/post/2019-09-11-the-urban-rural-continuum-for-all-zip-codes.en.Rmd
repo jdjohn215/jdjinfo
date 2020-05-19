@@ -1,0 +1,20 @@
+---
+title: The urban-rural continuum for all zip codes
+author: John D. Johnson
+date: '2019-09-11'
+slug: the-urban-rural-continuum-for-all-zip-codes
+categories:
+  - United States
+tags: []
+Description: ''
+Tags: []
+Categories: []
+DisableComments: no
+---
+
+I used the [USDA's RUCA codes](https://www.ers.usda.gov/data-products/rural-urban-commuting-area-codes/documentation/) to make this map.
+
+![](/post/2019-09-11-the-urban-rural-continuum-for-all-zip-codes.en_files/Screen Shot 2019-09-11 at 10.22.43 AM.png)
+
+[You can download a high-rez pdf version here.](https://www.dropbox.com/s/efo3oxmxhfr39ke/NationalMap.pdf?dl=1)
+

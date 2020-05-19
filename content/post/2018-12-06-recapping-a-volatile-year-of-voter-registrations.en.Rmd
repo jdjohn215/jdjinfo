@@ -1,0 +1,201 @@
+---
+title: Recapping a volatile year of voter registrations
+author: John D. Johnson
+date: '2018-12-06'
+slug: recapping-a-volatile-year-of-voter-registrations
+categories:
+  - Wisconsin
+  - Elections
+tags: []
+Description: ''
+Tags: []
+Categories: []
+DisableComments: no
+---
+
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(readxl)
+library(sf)
+library(knitr)
+library(kableExtra)
+
+rvs <- read_csv("~/dropbox/projects/wisconsinnov2018/regvoters/RVs_votes.csv")
+d <- read_csv("~/dropbox/projects/RegVoters18/VoterRegistrationStatistics_Dec1.csv")
+d.sum <- d %>% group_by(date) %>% summarise(registered = sum(RegVote))
+raw.rv <- read_csv("~/dropbox/projects/wisconsinnov2018/regvoters/Nov1_2017to_Dec1_2018_wards.csv")
+age.rv <- read_csv("~/dropbox/projects/regvoters18/byage/byAge2008to2018_withPOP.csv") %>%
+  mutate(year = str_sub(Date, 1, 4))
+exit.ages <- read_csv("~/Dropbox/Projects/WisconsinNov2018/ExitAges.csv")
+
+votes <- st_read("~/Dropbox/Projects/RegVoters18/20122020_WI_Election_Data_with_2017_Wards/2012_2020_Election_Data_with_2017_Wards.shp") %>%
+  st_set_geometry(NULL)
+turnout.18 <- 2673308
+turnout.16 <- sum(votes$PRETOT16)
+turnout.14 <- sum(votes$GOVTOT14)
+turnout.12 <- sum(votes$PRETOT12)
+```
+
+Registered voter counts in Wisconsin changed more over the course of 2018 than in any recent election year. This post describes what happened and examines what, if any, affect it may have had on the election.
+
+Here is an overview of recent Wisconsin registered voter counts. Since 2012, data has been updated on a more-or-less monthly basis.
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.align='center'}
+ggplot(d.sum, aes(as.Date(date), registered)) + 
+  geom_point() +
+  scale_y_continuous(name = "Reg. Voters", label = scales::comma,
+                     limits = c(2000000,4000000)) +
+  scale_x_date(limits = c(as.Date("2008-01-01"), as.Date("2019-04-01"))) +
+  xlab(NULL) +
+  geom_vline(xintercept = as.Date("2018-11-6"), linetype="dotted") +
+  geom_vline(xintercept = as.Date("2016-11-8"), linetype="dotted") +
+  geom_vline(xintercept = as.Date("2014-11-4"), linetype="dotted") +
+  geom_vline(xintercept = as.Date("2012-11-6"), linetype="dotted") +
+  labs(title = "Total registered voters in Wisconsin",
+       caption = "Source: WI Elections Commission") +
+  annotate("text", x=c(as.Date("2016-11-8"),as.Date("2014-11-4"),as.Date("2012-11-6")),
+           y=2150000, family="serif", angle = 90, vjust=-0.4,
+           label=c("16 election","14 election","12 election")) +
+  annotate("segment", x=as.Date("2013-01-04"), xend = as.Date("2012-08-01"), 
+           y=3695584, yend = 3755584) +
+  annotate("text", x=as.Date("2012-08-01"), y=3755584, family="serif", hjust=1,
+           label = "Peak after\n2012 election") +
+  annotate("segment", x=c(as.Date("2013-07-01"),as.Date("2013-07-01")),
+           y=c(3700000,3450000), yend = c(3700000,3450000), 
+           xend = c(as.Date("2013-08-01"),as.Date("2013-08-01"))) +
+  annotate("segment", x=as.Date("2013-08-01"), xend = as.Date("2013-08-01"),
+           y=3700000, yend = 3450000) +
+  annotate("text", x=as.Date("2013-08-10"), y=3600000, family="serif", hjust=0,
+           label = "4-YR\npurge") +
+  annotate("segment", x=as.Date("2016-12-28"), xend = as.Date("2016-08-01"), 
+           y=3729682, yend = 3755584) +
+  annotate("text", x=as.Date("2016-08-01"), y=3755584, family="serif", hjust=1,
+           label = "Peak after\n2016 election") +
+  annotate("segment", x=c(as.Date("2017-07-01"),as.Date("2017-07-01")),
+           y=c(3700000,3400000), yend = c(3700000,3400000), 
+           xend = c(as.Date("2017-08-01"),as.Date("2017-08-01"))) +
+  annotate("segment", x=as.Date("2017-08-01"), xend = as.Date("2017-08-01"),
+           y=3700000, yend = 3400000) +
+  annotate("text", x=as.Date("2017-08-10"), y=3550000, family="serif", hjust=0,
+           label = "4-YR\npurge") +
+  annotate("segment", x=c(as.Date("2017-11-01"),as.Date("2017-11-01")),
+           y=c(3300000,3000000), yend = c(3300000,3000000), 
+           xend = c(as.Date("2017-10-01"),as.Date("2017-10-01")), col="red") +
+  annotate("segment", x=as.Date("2017-10-01"), xend = as.Date("2017-10-01"),
+           y=3300000, yend = 3000000, col="red") +
+  annotate("text", x=as.Date("2017-09-25"), y=3150000, family="serif", hjust=1,
+           label = "ERIC\npurge", col="red") +
+  annotate("segment", x=as.Date("2012-09-01"), xend = as.Date("2013-01-01"),
+           y=turnout.12, yend = turnout.12, color = "blue", size=2, alpha=.75) +
+  annotate("segment", x=as.Date("2014-09-04"), xend = as.Date("2015-01-04"),
+           y=turnout.14, yend = turnout.14, color = "blue", size=2, alpha=.75) +
+  annotate("segment", x=as.Date("2016-09-08"), xend = as.Date("2017-01-08"),
+           y=turnout.16, yend = turnout.16, color = "blue", size=2, alpha=.75) +
+  annotate("segment", x=as.Date("2018-09-08"), xend = as.Date("2019-01-08"),
+           y=turnout.18, yend = turnout.18, color = "blue", size=2, alpha=.75) +
+  annotate("label", x=c(as.Date("2012-11-01"), as.Date("2014-11-04"), as.Date("2016-11-08"),
+                        as.Date("2018-11-06")),
+           y=c(turnout.12, turnout.14, turnout.16, turnout.18),
+           family="serif", vjust = c(1.4,-.4,1.4,-.4), color = "blue", label.size=0,
+           label = c(paste0("turnout: ",round(turnout.12/1000000, digits = 2),"M"), 
+                     paste0("turnout: ",round(turnout.14/1000000, digits = 2),"M"), 
+                     paste0("turnout: ",round(turnout.16/1000000, digits = 2),"M"), 
+                     paste0("turnout: ",round(turnout.18/1000000, digits = 2),"M"))) +
+  theme_bw(base_family = "serif")
+```
+
+In the past, the total count of registered voters has followed a consistent pattern. Presidential elections are preceded by a steep rise in registered voters (peaking just after the election as election-day registrations get added to the system). The number then declines abruptly in the following year due to the state's "four-year voter record maintenance." Midterm elections see a smaller version of this trend.
+
+This pattern changed in 2017 and 2018. First of all, the four-year purge following the 2016 general election was quite large because many people voted in 2012 but not since then. The state then followed this with a second purge which attemped to identify people who've moved using administrative records provided by the non-profit Electronic Registration Information Center (ERIC). This second purge was about the same size as the standard four-year maintenance. As a result, in early 2018 the number of registered voters in the state fell to its lowest point on record--about 3.03 million.
+
+Problems with the ERIC purge became apparent in the first election after its implementation. Some people (who hadn't moved) showed up to vote in the February 2018 primary election only to discover their registration had been terminated. As a result, the Elections Commission took a series of steps over the following months which had the cumulative effect of rolling back the ERIC purge entirely. The Milwaukee Elections Commission, for example, restored the registrations of 21,000 people shortly before the election who had been improperly removed.[^1]
+
+These reinstations along with the normal rush of citizens to register before an election combined to add `r prettyNum(paste((sum(raw.rv$reg[raw.rv$date == "2018-12-01"], na.rm = T) - sum(raw.rv$reg[raw.rv$date == "2018-02-01"], na.rm = T))), big.mark = ",")` registered voters statewide from February 1 to December 1. By comparison, the state added 95,001 over the same period in 2014. The total number of registered voters on Dec. 1, 2018 (3.40 million) was still slightly lower than the number on Dec. 1, 2014 (3.46 million). Despite this, the total votes vast in 2018 was up 11% over 2014. 
+
+Given the successful performance of Democrats statewide, one might wonder if some of 2018's rapid growth in voter registrations was due to unusually high levels of Democratic voter mobilization. I can't yet answer this question definitively, but a municipality-level regression of the governor's vote and the increase in voter registrations since February reveals no significant correlation when controlling for the size of the ERIC purge in that municipality. Instead, the amount of "new" registered voters a municipality added in 2018 is most strongly correlated with the number of voters it lost in the ERIC purge.
+
+##  Age trends
+As expected, young people made up the bulk of new registered voters during the waning days of the campaign. These are the citizens who are both the least likely to have registered previously *and* the most likely to have had their registrations purged even if they had (since they are more mobile and less likely to vote in midterms).
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.align='center'}
+age.plot1 <- age.rv %>%
+  filter(year == 2018)
+ggplot(age.plot1, aes(as.Date(Date), reg, col = age)) +
+  geom_point() +
+  geom_line() +
+  ggrepel::geom_text_repel(data = age.plot1[age.plot1$Date=="2018-12-01",],
+                           aes(label = age), family = "serif") +
+  scale_y_continuous(labels = scales::comma, name = "reg. voters") +
+  xlab(NULL) +
+  labs(title = "Total registered voters by age group, 2018") +
+  theme_bw(base_family = "serif") +
+  theme(legend.position = "none")
+```
+
+### The electorate was older in 2018
+The increase in young registered voters is even more pronounced in this graph, which shows each age group's share of the registered voters minus their share of the adult population. But once again, the significant uptick among young voters in 2018 mainly just compensated for previous losses. 
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.align='center'}
+d.reg <- age.rv %>%
+  mutate(p.of.reg = p.total) %>%
+  select(Date, age, p.of.reg)
+d.pop <- age.rv %>%
+  group_by(Date) %>%
+  mutate(total.pop = sum(pop)) %>% ungroup() %>%
+  mutate(p.of.pop = pop/total.pop) %>%
+  select(Date, age, p.of.pop)
+
+d.compare <- inner_join(d.reg, d.pop) %>%
+  mutate(reg.minus.pop = p.of.reg - p.of.pop)
+
+
+ggplot() +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "grey") +
+  geom_point(data = d.compare, aes(Date, reg.minus.pop, color=age)) +
+  geom_line(data = d.compare, aes(Date, reg.minus.pop, color=age)) +
+  geom_text(data = d.compare[d.compare$Date==max(d.compare$Date),],
+            aes(Date, reg.minus.pop, label=age),
+            hjust=0, family="serif", nudge_x = 30) +
+  scale_y_continuous(labels = scales::percent,
+                     name = NULL) +
+  scale_x_date(name = NULL, limits = c(as.Date("2010-10-31"),
+                                       as.Date("2019-03-01"))) +
+  labs(title = "Registered voters by age group as a percent of adult population share",
+       subtitle = "Wisconsin, 2010 - 2018",
+       caption = "Source: WI Elections Commission") +
+  theme_bw(base_family = "serif") +
+  theme(legend.position = "none")
+```
+
+Registered voters as a whole were even older in 2018 than in 2014. In the table below the "absolute shift" shows the change in share of all registered voters held by each age group. The proportion of registered voters ages 18 to 24 declined by 0.2%. The "relative shift" shows that shift minus each age group's change in share of the total population. The fastest growing age group in Wisconsin is people 65+, but these seniors increased their share of all registered voters even faster.
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.align='center'}
+
+d.compare %>%
+  group_by(age) %>%
+  summarise(`absolute shift` = (p.of.reg[Date == "2018-12-01"] - p.of.reg[Date == "2014-12-01"])*100,
+            `relative shift` = (reg.minus.pop[Date == "2018-12-01"] - reg.minus.pop[Date == "2014-12-01"])*100) %>%
+  kable(caption = "Shift in registered voter share, 2014 to 2018", digits = 1, format = "html") %>%
+  kable_styling(bootstrap_options = "striped", full_width = F)
+
+```
+
+So far, these figures have just discussed data among all registered voters, which is not the same thing as the actual electorate. However, the exit polls show the same aging trend.[^2] People over age 65 increased as a share of the electorate from 18% to 25%. Voters 18-29 and 30-44 decreased by 2% and 4% respectively. At the same time, Walker improved his performance by 4% among the oldest voters. However, this was not enough to overcome Democratic improvements with every other age group.
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.align='center'}
+exit.ages %>%
+  kable(caption = "Share of the electorate and vote choice by age group",
+        col.names = c("", "2014", "2018", "2014", "2018"), format = "html") %>%
+  add_header_above(c(" " = 1, "% of all voters" = 2, "Democrat minus Walker\nmargin" = 2)) %>%
+  kable_styling(bootstrap_options = "striped", full_width = F)
+```
+
+##  Summary
+The large registered voter count swings over the course of 2018 do not seem to have impacted the election in November to any great degree. Rather, the growth in registered voters over 2018 is tied closely to the ultimately-rolled back purge of registrants conducted at the end of 2017 and early 2018. In fact, many of these "new" registered voters had their registrations reinstated automatically by local elections officials.
+
+By election day, older Wisconsinites made up a larger share of all registered voters than in 2018, and (according to the exit polls) they also made up a larger share of all voters. These older voters became even more supportive of Scott Walker simultaneously as they expanded their share of the electorate. However, younger and middle-aged voters shifted toward the Democrats enough to overcome the growing conservative activism of their elders.
+
+
+[^1]: https://www.jsonline.com/story/news/politics/elections/2018/09/25/21-000-milwaukee-voters-go-back-rolls/1420715002/
+[^2]: https://www.cbsnews.com/elections/2014/governor/wisconsin/exit/# & https://projects.jsonline.com/topics/election/2018/11/6/exit-polls/index.html

@@ -1,0 +1,200 @@
+---
+title: How church attendance affects Trump support
+author: John D. Johnson
+date: '2020-01-23'
+slug: how-church-attendance-affects-trump-support
+categories:
+  - Public opinion
+  - Wisconsin
+tags: []
+Description: ''
+Tags: []
+Categories: []
+DisableComments: no
+---
+
+
+
+<p>Churchgoing Wisconsinites are more likely to approve of Trump’s job performance than their less observant peers. Although some individual steps are within the margin of error<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a>, the trend is monotonic. People who go to church more than once a week approve of Trump more than those who go only weekly; they in turn support Trump more than people who only go once or twice a month, and so on.</p>
+<p><img src="/post/2020-01-23-how-church-attendance-affects-trump-support.en_files/figure-html/unnamed-chunk-1-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>Wisconsin registered voters who go to church at least once a month are 12% more likely to strongly approve of Trump’s job performance than those who don’t. These regular churchgoers are 18% <em>less</em> likely to say they strongly disapprove of Trump.</p>
+<p>This in itself probably won’t surprise anyone. After all, Trump’s support is famously concentrated among evangelical Christians who have very high levels of church attendance.<a href="#fn2" class="footnote-ref" id="fnref2"><sup>2</sup></a> Three-fourths of self-described “born-again or evangelical” Christians report attending at least once a month, compared with 55% of Catholics and 48% of Mainline Protestants.</p>
+<p>But church attendance correlates with greater support for Trump (or less disapproval, at least) among all three of these groups. In fact, Trump support increases in a statistically significant way even for the tiny faction of non-religious people who attend church regularly.<a href="#fn3" class="footnote-ref" id="fnref3"><sup>3</sup></a></p>
+<p>To measure this question, I combined all 14 <a href="https://law.marquette.edu/poll/category/results-and-data/">Marquette University Law School Polls</a> fielded from January 2018 to January 2020, and I recoded church attendance into two categories–people who report going to church once a month or more and people who attend church only a few times a year, seldom, or never.<a href="#fn4" class="footnote-ref" id="fnref4"><sup>4</sup></a> Using this large pool of responses, I compared the relationship between church attendance and Trump approval among each of these religious groups: Born-again or evangelical Christians, Mainline Protestants, Roman Catholics, and those professing no religion. Respectively, these represent 18%, 25%, 28%, and 17% of Wisconsin’s registered voters.</p>
+<p>Here are the results. The vertical lines around each dot show the 95% confidence interval. For example, 47% of born again Protestants who go to church at least monthly strongly approve of Trump’s job performance. Fewer (42%) of less-frequent evangelical attenders strongly approve of Trump, but this difference is not statistically significant.</p>
+<p><img src="/post/2020-01-23-how-church-attendance-affects-trump-support.en_files/figure-html/unnamed-chunk-2-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>Here are the statistically significant results.</p>
+<ul>
+<li>Evangelicals who go to church less than once a month are more likely to strongly disapprove of Trump than their more regularly attending counterparts. Difference: 8%.</li>
+<li>Mainline Protestants who go to church regularly are <em>more</em> likely (+5%) to somewhat approve of Trump and <em>less</em> likely (-10%) to strongly disapprove of Trump than Mainliners who don’t go to church much.</li>
+<li>Churchgoing Catholics are more likely to strongly approve of Trump (+8%) and less likely to strongly disapprove of him (-11%) than less-attending Catholics.</li>
+<li>Non-religious people who still go to church regularly are more likely to somewhat approve of Trump (+12%) and less likely to strongly disapprove of him (-25%) than non-religious people who avoid church.</li>
+</ul>
+<div id="what-about-partisanship" class="section level3">
+<h3>What about partisanship?</h3>
+<p>Maybe churchgoers of all these different orientations are just more likely to be Republicans. To test this, I ran the regression model below. The base category is self-described Independents who go to church less than once a month, if at all. The independent variable, <code>partyID3</code>, is coded <code>-1</code> for Republicans, <code>0</code> for Independents, and <code>1</code> for Democrats. <code>ChurchAttend</code> is coded <code>1</code> if people attend church at least once a month.</p>
+<p>According to this model, we expect 43% of Independents who don’t go to church to approve of Trump. Going to church at least once per month correlates with a 7% increase in Trump approval, regardless of party ID.</p>
+<div align="center">
+<table style="text-align:center">
+<caption>
+<strong>Trump approval ~ Church Attendance + Party Identification</strong>
+</caption>
+<tr>
+<td colspan="2" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+<em>Dependent variable:</em>
+</td>
+</tr>
+<tr>
+<td>
+</td>
+<td colspan="1" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+TrumpApprove
+</td>
+</tr>
+<tr>
+<td colspan="2" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+ChurchAttend
+</td>
+<td>
+0.064<sup>***</sup>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(0.007)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+partyID3
+</td>
+<td>
+-0.423<sup>***</sup>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(0.004)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Constant
+</td>
+<td>
+0.439<sup>***</sup>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(0.004)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td colspan="2" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Observations
+</td>
+<td>
+13,080
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+R<sup>2</sup>
+</td>
+<td>
+0.452
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Adjusted R<sup>2</sup>
+</td>
+<td>
+0.451
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Residual Std. Error
+</td>
+<td>
+0.369 (df = 13077)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+F Statistic
+</td>
+<td>
+5,383.467<sup>***</sup> (df = 2; 13077)
+</td>
+</tr>
+<tr>
+<td colspan="2" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+<em>Note:</em>
+</td>
+<td style="text-align:right">
+<sup><em></sup>p&lt;0.1; <sup><strong></sup>p&lt;0.05; <sup></strong></em></sup>p&lt;0.01
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="footnotes">
+<hr />
+<ol>
+<li id="fn1"><p>All statistics are for registered voters. All statistics discussed are statistically significant with 95% confidence unless otherwise noted.<a href="#fnref1" class="footnote-back">↩</a></p></li>
+<li id="fn2"><p>We define “evangelicals” as those who answer yes to “Would you describe yourself as a ‘born-again’ or evangelical Christian, or not?” We do not ask Roman Catholics or non-Christians this question.<a href="#fnref2" class="footnote-back">↩</a></p></li>
+<li id="fn3"><p>Six percent of people who say they have “no religion” still claim to go to church at least once a month.<a href="#fnref3" class="footnote-back">↩</a></p></li>
+<li id="fn4"><p>Trump’s approval rating was very stable during this period, never climbing above 48% or falling below 42%.<a href="#fnref4" class="footnote-back">↩</a></p></li>
+</ol>
+</div>

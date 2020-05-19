@@ -1,0 +1,19 @@
+---
+title: Wisconsin elevations
+author: John D. Johnson
+date: '2018-04-11'
+slug: wisconsin-elevations
+categories:
+  - Wisconsin
+tags: []
+Description: ''
+Tags: []
+Categories: []
+DisableComments: no
+---
+
+This chart shows elevations across the state of Wisconsin. To create it, I generated a grid of points at even intervals across the state. Then I calculated the elevation above sea level at each location. The lines drawn across the state are offset by an amount proportional to the elevation at that location. There are 94,407 data points in total.
+
+[Click here for a larger version.](/post/2018-04-11-wisconsin-elevations.en_files/ElevMap1BIG.png)
+
+![](/post/2018-04-11-wisconsin-elevations.en_files/ElevMap1SMALL.png)

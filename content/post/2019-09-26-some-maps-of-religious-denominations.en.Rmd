@@ -1,0 +1,224 @@
+---
+title: Some maps of religious denominations
+author: John D. Johnson
+date: '2019-09-26'
+slug: some-maps-of-religious-denominations
+categories:
+  - United States
+  - Religion
+tags: []
+Description: ''
+Tags: []
+Categories: []
+DisableComments: no
+---
+
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(knitr)
+library(tmap)
+library(sf)
+options(stringsAsFactors = F)
+d <- readRDS("~/Dropbox/Projects/2019/September/Religion/data/CleanCountyData2010.rds")
+cnty.shp <- st_read("~/Dropbox/Projects/SHPfiles/cb_2017_us_county_5m/cb_2017_us_county_5m.shp") %>%
+  filter(STATEFP < 57,
+         ! STATEFP %in% c("02", "15")) %>%
+  mutate(fips = paste0(STATEFP, COUNTYFP)) %>%
+  select(fips)
+```
+
+*These maps were made with data collected by the [**2010 U.S. Religion Census**](http://www.usreligioncensus.org/), a project sponsored by the Association of Statisticians of American Religious Bodies. Please note that, while all maps use a continuous color scale, the end point of the color ramp in each map is scaled independently.*
+
+Even in this "secular age," America's fraught religious history reaches into the present. The following maps show the number of adherents reported by different religious organizations in each county (normalized to total population).
+
+
+## Baptists
+
+You can practically draw state lines using these two maps. That's not coincidental. The Southern Baptists seceded from their northern Baptists in 1845. 174 years later their territory still ends abruptly at the Nebraska, Iowa, Indiana, and West Virginia state lines.
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE, out.width='100%'}
+d.sbc <- cnty.shp %>%
+    left_join(filter(d, denom == "sbc")) %>%
+    mutate(rate = replace(rate, is.na(rate), 0),
+           denom = "Southern Baptist") %>%
+  select(fips, denom, rate)
+d.abc <- cnty.shp %>%
+    left_join(filter(d, denom == "abc")) %>%
+    mutate(rate = replace(rate, is.na(rate), 0),
+           rate = replace(rate, rate > 200, 200),
+           denom = "American (Northern) Baptist") %>%
+  select(fips, denom, rate)
+d.baptist <- rbind(d.sbc, d.abc)
+
+tm_shape(d.baptist) +
+    tm_polygons(lwd = 0.4, border.col = "grey50",
+                alpha = 0) +
+    tm_shape(d.baptist) +
+    tm_fill(col = "rate", palette = "Greys", style = "cont",
+            title = "per 1k", legend.is.portrait = FALSE) +
+  tm_facets(by = "denom", drop.NA.facets = TRUE,
+            drop.empty.facets = TRUE,
+            free.scales = TRUE, ncol = 1) +
+  tm_layout(frame = F, fontfamily = "serif",
+            legend.outside.size = .1)
+```
+
+The much smaller American Baptist Churches denomination (successors to the Northern Baptists) still occupies essentially the inverse of the Southern Baptists.
+
+
+The largest predominately Black Baptist denomination is the National Baptist Convention, which is concentrated in South, with additional populations in various Northern cities, reflecting the Great Migration.
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+d.nbc <- cnty.shp %>%
+    left_join(filter(d, denom == "nbc")) %>%
+    mutate(rate = replace(rate, is.na(rate), 0))
+tm_shape(d.nbc) +
+    tm_polygons(lwd = 0.4, border.col = "grey50",
+                alpha = 0) +
+    tm_shape(d.nbc) +
+    tm_fill(col = "rate", palette = "Greys", style = "cont",
+            title = "per 1k") +
+    tm_layout(frame = F, fontfamily = "serif",
+              main.title = "National Baptist Convention adherents")
+```
+
+
+## The Methodists
+The United Methodist Church is the largest "Wesleyan" denomination. It has presence in most of the United States, including a longstanding concentration in the Appalachians. The largest concentrations are located in the Great Plains states of Iowa, Nebraska, and Kansas, where as much as 30% of the population are counted among its members.
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+d.unitedMethodist <- cnty.shp %>%
+    left_join(filter(d, denom == "umc")) %>%
+    mutate(rate = replace(rate, is.na(rate), 0))
+tm_shape(d.unitedMethodist) +
+    tm_polygons(lwd = 0.4, border.col = "grey50",
+                alpha = 0) +
+    tm_shape(d.unitedMethodist) +
+    tm_fill(col = "rate", palette = "Greys", style = "cont",
+            title = "per 1k") +
+    tm_layout(frame = F, fontfamily = "serif",
+              main.title = "United Methodist adherents")
+```
+
+Methodism has an equally long history among black Americans. The African Methodist Episcopal Church (AME) and the African Methodist Episcopal Zion Church (AME Zion) both independently seceded from what was then called the "Methodist Episcopal Church" in the early 19th century. At this time they were based in the Mid-Atlantic region--particularly Pennsylvania and New York. After the Civil War they sent missionaries to the southern states.
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE, out.width='100%'}
+d.ame <- cnty.shp %>%
+    left_join(filter(d, denom == "ame")) %>%
+    mutate(rate = replace(rate, is.na(rate), 0),
+           denom = "AME") %>%
+  select(fips, denom, rate)
+d.amez <- cnty.shp %>%
+    left_join(filter(d, denom == "amez")) %>%
+    mutate(rate = replace(rate, is.na(rate), 0),
+           denom = "AMEZ") %>%
+  select(fips, denom, rate)
+d.ameZ <- rbind(d.ame, d.amez)
+
+tm_shape(d.ameZ) +
+    tm_polygons(lwd = 0.4, border.col = "grey50",
+                alpha = 0) +
+    tm_shape(d.ameZ) +
+    tm_fill(col = "rate", palette = "Greys", style = "cont",
+            title = "per 1k", legend.is.portrait = FALSE) +
+  tm_facets(by = "denom", drop.NA.facets = TRUE,
+            drop.empty.facets = TRUE,
+            free.scales = TRUE, ncol = 1) +
+  tm_layout(frame = F, fontfamily = "serif",
+            legend.outside.size = .1)
+```
+
+
+## Lutherans
+Lutherans are one of America's largest religious groups, but depending on where you live, you might not know any. Or again, nearly everyone you know might be affiliated with one Lutheran denomination or another. Overwhelmingly concentrated in the upper Midwest, their geographic dispersion reflects the immigration patterns of Scandinavian and German migrants during the late 19th and early 20th centuries.
+
+The most conservative of these three denominations is the Wisconsin Evangelical Lutheran Synod (WELS), which was founded by German immigrants to Wisconsin in 1850. The similarly conservative Lutheran Church Missouri Synod (LCMS) was formed by German immigrants to Missouri in the 1830s. Part of the [Saxon Luthern immigration of 1838-39](https://en.wikipedia.org/wiki/Saxon_Lutheran_immigration_of_1838%E2%80%9339) they fled religious persecution under the growing Prussian Empire.
+
+The largest Lutheran denomination is the mainline Evangelical Lutheran Church in America (ELCA) which formed in 1988 with the merger of three predecessor organizations. It contains approximately 3.4 million baptized members.
+
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE, out.width='100%'}
+d.elca <- cnty.shp %>%
+    left_join(filter(d, denom == "elca")) %>%
+    mutate(rate = replace(rate, is.na(rate), 0),
+           denom = "ELCA") %>%
+  select(fips, denom, rate)
+d.lcms <- cnty.shp %>%
+    left_join(filter(d, denom == "lcms")) %>%
+    mutate(rate = replace(rate, is.na(rate), 0),
+           rate = replace(rate, rate > 200, 200),
+           denom = "LCMS") %>%
+  select(fips, denom, rate)
+d.wels <- cnty.shp %>%
+    left_join(filter(d, denom == "wels")) %>%
+    mutate(rate = replace(rate, is.na(rate), 0),
+           rate = replace(rate, rate > 200, 200),
+           denom = "WELS") %>%
+  select(fips, denom, rate)
+d.lutheran <- rbind(d.elca, d.lcms, d.wels)
+
+tm_shape(d.lutheran) +
+    tm_polygons(lwd = 0.4, border.col = "grey50",
+                alpha = 0) +
+    tm_shape(d.lutheran) +
+    tm_fill(col = "rate", palette = "Greys", style = "cont",
+            title = "per 1k", legend.is.portrait = FALSE) +
+  tm_facets(by = "denom", drop.NA.facets = TRUE,
+            drop.empty.facets = TRUE,
+            free.scales = TRUE) +
+  tm_layout(frame = F, fontfamily = "serif",
+            legend.outside.size = .1)
+```
+
+## Catholics
+
+Catholics have come to America in many different waves and from many directions. That varied history is clearly evident in this map: Cajuns in Louisiana, Latinos in the Southwest, Germans in Wisconsin, Irish in Massachussetts...
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+d.catholic <- cnty.shp %>%
+    left_join(filter(d, denom == "cth")) %>%
+    mutate(rate = replace(rate, is.na(rate), 0))
+tm_shape(d.catholic) +
+    tm_polygons(lwd = 0.4, border.col = "grey50",
+                alpha = 0) +
+    tm_shape(d.catholic) +
+    tm_fill(col = "rate", palette = "Greys", style = "cont",
+            title = "per 1k") +
+    tm_layout(frame = F, fontfamily = "serif",
+              main.title = "Roman Catholic adherents")
+```
+
+
+## Miscellaneous curiosities
+
+As the preferred church of WASPS, I expected the Episcopalians to be concentrated in New England. To my surprise nowhere comes close to rural South Dakota in terms of per-county concentration. It turns out the Epicopal Church has a [long history](https://episcopalchurchsd.org/a-brief-history-of-our-diocese) in the Lakota and Dakota reservations of South Dakota.
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+d.ec <- cnty.shp %>%
+    left_join(filter(d, denom == "ec")) %>%
+    mutate(rate = replace(rate, is.na(rate), 0))
+tm_shape(d.ec) +
+    tm_polygons(lwd = 0.4, border.col = "grey50",
+                alpha = 0) +
+    tm_shape(d.ec) +
+    tm_fill(col = "rate", palette = "Greys", style = "cont",
+            title = "per 1k") +
+    tm_layout(frame = F, fontfamily = "serif",
+              main.title = "Episcopalian adherents")
+```
+
+You may have noticed that none of churches I've shown have a strong presence on the West Coast, with the sole exception of Catholicism in Southern California. In large part this reflects the region's relative secularism. But the West Coast also has it's own religious traditions. One is the International Church of the Foursquare Gospel. This pentecostal denomination was founded by one of the most unusual American public figures of the early 20th century. Aimee Semple McPherson (better known as Sister Aimee) was a faith healer, pioneer radio evangelist, and early media celebrity who founded one of the world's first megachurches, Angelus Temple, in Los Angeles in 1923. The Foursquare Church, now with 9 million members worldwide, remains most heavily concentrated on the West Coast.
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+d.foursquare <- cnty.shp %>%
+    left_join(filter(d, denom == "four")) %>%
+    mutate(rate = replace(rate, is.na(rate), 0))
+tm_shape(d.foursquare) +
+    tm_polygons(lwd = 0.4, border.col = "grey50",
+                alpha = 0) +
+    tm_shape(d.foursquare) +
+    tm_fill(col = "rate", palette = "Greys", style = "cont",
+            title = "per 1k") +
+    tm_layout(frame = F, fontfamily = "serif",
+              main.title = "Foursquare Church adherents")
+```

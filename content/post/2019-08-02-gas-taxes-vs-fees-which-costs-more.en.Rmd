@@ -1,0 +1,47 @@
+---
+title: 'Gas taxes vs fees: which costs more?'
+author: John D. Johnson
+date: '2019-08-02'
+slug: gas-taxes-vs-fees-which-costs-more
+categories:
+  - Wisconsin
+tags: []
+Description: ''
+Tags: []
+Categories: []
+DisableComments: no
+---
+
+[**Note:** this post has been updated to fix an error. I initially calculated revenue from annual renewals by using the figure for total licensed drivers. I have updated this using the figure for total registered vehicles--a higher number. This raises my estimate of revenue raised by the GOP plan from $231 million to $236 million.]
+
+
+The 2019-20 state budget writes a new chapter in Wisconsin's ongoing struggle to figure out how to pay for its roads.
+
+Gov. Evers proposed raising the gas tax by 8 cents. Instead, we're getting a $10 increase in annual registration fees and a $94 increase in titling fees for vehicle purchases. **In this post I try to figure out which costs more for the average Wisconsinite.**
+
+## The background
+
+From 1985 to 2006, the gas tax in Wisconsin was automatically "indexed," or adjusted for inflation, each year. Republican legislators and Democratic Governor Jim Doyle ended that in 2006.[^1]
+
+In his proposed 2019 budget, Evers proposed increasing the existing $0.309 gas tax by 8 cents and indexing it to inflation. This gas tax "raise" actually just puts the tax where it would be if the state hadn't stopped adjusting the tax for inflation back in 2006.[^2]
+
+Republicans in the state legislature instead chose to raise annual vehicle renewal fees by $10 and titling fees by $94. Evers signed these changes into law, though his administration's transportation secretary recently said a gas tax hike would still be necessary in the next budget cycle.[^3]
+
+Given Wisconsin's annual motor gasoline consumption of about `r prettyNum(round(61991000*42, digits = -5), big.mark = ",")` gallons,[^4] an 8 cent increase in the gas tax would have raised about $208 million for roads. The Republican plan will likely raise even more--around $236 million dollars each year. $`r prettyNum(round(mean(c(1969952,2046616,2019956,2042103,1994823))*94, -5), big.mark = ",")` of that will come from new titles and $`r prettyNum(round(mean(c(4766495,4474381,4840189,4554938,4892260))*10, -5), big.mark = ",")` from annual renewals.[^5]
+
+## What will you pay?
+Under Evers' plan, the amount you paid towards roads was proportional to the amount you drove.[^6] The Republican plan charges you based on how much you change vehicles.
+
+In 2017, Wisconsin had 4,234,793 active driver's licenses. About `r prettyNum(59799000*42, big.mark = ",")` gallons of gasoline were purchased for transportation purposes. If these gallons were *only* purchased by Wisconsin drivers, that means each driver would have consumed, on average, `r round((59799000*42)/4234793, digits = 0)` gallons of gas. In reality, an unknown (but surely considerable) amount of this gas was purchased by out-of-state drivers, both on vacation and by Illinois border-dwellers. In any case, I will use 593 as an upper limit; the real number is certainly lower. Using this statistic, the average Wisconsin driver would have spent an additional $`r round(593*.08, 2)` per year.
+
+Under the new law, every driver will start out paying an additional $10 per vehicle. They will also pay $94 more dollars every time they get a new title. The number of new titles granted by WisDOT varies from year to year, but from 2014-18 the average was 2,015,000. Obviously, some people buy titles much more often than other people. This may be because they are poor and replace vehicles often, or because they are rich and have lots of recreational vehicles. Nonetheless, if we imagine that every licensed driver buys new titles at an equal rate, this would mean that a title was being purchased by 48% of Wisconsin drivers each year. In other words, most people would buy a title every two years or so.
+
+Using the (inevitably flawed) assumpations I've laid out above, here's how the numbers work out. Under the new law, the average Wisconsin driver pays about $114 more dollars every two years. That is $10 each year for the new renewal fees and $94 additional for a new title. Under Tony Evers' gas tax hike, the average driver would have spent about an additional $95 in gas taxes over the same two years.
+
+
+[^1]: https://www.wpr.org/gov-tony-evers-calls-gas-tax-increase-first-budget
+[^2]: https://data.bls.gov/cgi-bin/cpicalc.pl?cost1=30.9&year1=200607&year2=201906
+[^3]: https://www.jsonline.com/story/news/politics/2019/07/26/tony-evers-dot-secretary-says-lawmakers-should-raise-gas-tax-in-2021/1841226001/
+[^4]: https://ipsr.ku.edu/ksdata/ksah/energy/18ener6a.pdf
+[^5]: I calculate these numbers by multiplying the average of the past five years of [registration renewals](https://wisconsindot.gov/Documents/about-wisdot/newsroom/statistics/factsfig/lp-rstickers.pdf) by 10 and a [mean of the past five years of new titles issued](https://wisconsindot.gov/Documents/about-wisdot/newsroom/statistics/factsfig/certoftitle.pdf) by 94.
+[^6]: each person's coefficient being determined by their vehicle's fuel efficiency, of course

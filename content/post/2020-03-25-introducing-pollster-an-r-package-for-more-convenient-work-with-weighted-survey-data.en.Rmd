@@ -1,0 +1,28 @@
+---
+title: Introducing pollster, an R package for more convenient work with weighted survey
+  data
+author: John D. Johnson
+date: '2020-03-25'
+slug: introducing-pollster-an-r-package-for-more-convenient-work-with-weighted-survey-data
+categories:
+  - RStats
+  - Public opinion
+tags: []
+Description: ''
+Tags: []
+Categories: []
+DisableComments: no
+---
+
+My R package `pollster` is now available [on CRAN](https://cran.r-project.org/web/packages/pollster/index.html). Lots of great R packages already exist for complex analysis of survey data. This package fills a gap by creating simple functions that build topline, crosstab, and summary tables of weighted survey data. Optionally, all of these tables can include the margin of error. The margin of error includes the design effect calculated in the manner described by [Kish (1965)](doi:10.1002/bimj.19680100122).
+
+`pollster` automatically handles labelled data using the excellent [`labelled` package](https://cran.r-project.org/web/packages/labelled/vignettes/intro_labelled.html). All functions are compatible with non-standard evaluation as used in the tidyverse.
+
+The point of `pollster` is not to return pretty pre-formatted tables for publication. Instead, function output is always a tibble, or simple data frame. This allows you to easily pass the object to `ggplot`, `knitr::kable`, or any other graphing or table-formatting function.
+
+See these pages for examples of `pollster` at work.
+
+* [**ReadMe**](https://github.com/jdjohn215/pollster/blob/master/README.md) - a high level overview of each function
+* [**toplines vignette**](https://cran.r-project.org/web/packages/pollster/vignettes/toplines.html) - detailed descriptions of the functions to make toplines, with and without the margin of error
+* [**crosstabs vignette**](https://cran.r-project.org/web/packages/pollster/vignettes/crosstabs.html) - detailed descriptions of the functions for 2-way crosstabs
+* [**3-way crosstabs vignette**](https://cran.r-project.org/web/packages/pollster/vignettes/crosstab3way.html) - detailed descriptions of the functions for 3-way crosstabs
