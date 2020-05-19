@@ -66,3 +66,9 @@ url = "mailto:jdjohn215@gmail.com"
   identifier = "Feed"
   weight = 300
   url = "/"
+  
+  [[menu.main]]
+  name = "Resume"
+  identfier = "Resume"
+  weight = 400
+  url = "files/Resume_JDJ.html"
