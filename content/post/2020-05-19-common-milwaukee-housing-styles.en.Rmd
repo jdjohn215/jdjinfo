@@ -1,0 +1,18 @@
+---
+title: Common Milwaukee housing styles
+author: John D. Johnson
+date: '2020-05-19'
+slug: milwaukee-housing-styles-poster
+categories:
+  - Milwaukee
+  - Housing
+tags: []
+Description: ''
+Tags: []
+Categories: []
+DisableComments: no
+---
+
+This poster was created using data from the Milwaukee City Assessor's [Master Property File](https://data.milwaukee.gov/dataset/mprop). I recommend using a large screen for ease of viewing.
+
+![Common Milwaukee Architectural Styles](/post/2020-05-19-common-milwaukee-housing-styles.en_files/Milwaukee_Housing_Styles_Poster.png)
