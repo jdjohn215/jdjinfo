@@ -20,4 +20,4 @@ This is my personal website. Opinions expressed here are mine alone and do not r
 * [Twitter](https://twitter.com/jdjmke)
 * [Personal email](jdjohn215@gmail.com)
 
-The logo image on this website is a cropped image of Milwaukee’s City Hall clock tower. The original image is an circa 1898 “Panoramic View of Milwaukee, Wis. Taken from City Hall Tower” by the Gugler Lithographic Co. It’s available in high resolution on the [Library of Congress Website](https://www.loc.gov/item/98508658/).
+The logo image on this website is a cropped image of Milwaukee’s City Hall clock tower. The original image is an circa 1898 “Panoramic View of Milwaukee, Wis. Taken from City Hall Tower” by the Gugler Lithographic Co. It is available in high resolution on the [Library of Congress Website](https://www.loc.gov/item/98508658/).
