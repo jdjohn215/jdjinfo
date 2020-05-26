@@ -17,7 +17,7 @@ ignoreFiles = ["\\.Rmd$", "\\.Rmarkdown$", "_files$", "_cache$"]
 [params]
 title = "John D. Johnson"
 author = "John D. Johnson"
-description = "public opinion, elections, demographics, housing; some RStats too"
+description = "''pulling compelling conclusions from dull and intractable datasets.'' -- public opinion, elections, demographics, housing; some RStats too"
 profilePicture = "images/logo.png"
 keywords = ""
 favicon = "favicons/"
