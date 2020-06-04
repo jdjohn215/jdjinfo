@@ -73,7 +73,7 @@ rain.plot <- ggplot() +
   scale_x_continuous(breaks = leapyear.month.mids, labels = month.name,
                      name = "month") +
   scale_y_continuous(name = "inches") +
-  labs(title = "Year-to-date rainfall in Milwaukee",
+  labs(title = "Year-to-date precipitation in Milwaukee",
        subtitle = str_wrap(rain.subtitle.text, 120),
        caption = str_wrap(caption.text, 145)) +
   ggthemes::theme_tufte() +
