@@ -62,7 +62,7 @@ rain.plot <- ggplot() +
             color = "grey40", size = 1.5) +
   # this year's precipitation, ytd
   geom_line(data = general.mitchell.2020, aes(dayofleapyear, cum_precip),
-            size = 1.75) +
+            size = 1.5) +
   geom_vline(xintercept = leapyear.month.breaks, color = "aliceblue", size = 0.1) +
   geom_hline(yintercept = c(0,10,20,30,40,50), color = "aliceblue", size = 0.1) +
   # text data label
