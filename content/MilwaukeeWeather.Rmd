@@ -1,0 +1,196 @@
+---
+title: "Milwaukee Weather"
+author: "John Johnson"
+date: "6/4/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(knitr)
+library(tidyverse)
+knitr::opts_chunk$set(fig.width=8, fig.height=4.5) 
+
+
+general.mitchell.2020 <- read_table(file = "ftp://ftp.ncdc.noaa.gov/pub/data/gsod/2020/726400-14839-2020.op.gz") %>%
+  select(station_id = 1, 3, max_temp = MAX, min_temp = MIN, precip = PRCP) %>%
+  separate(YEARMODA, sep = c(4,6), into = c("year","month","day")) %>%
+  mutate(max_temp = as.numeric(str_remove(max_temp, coll("*"))),
+         min_temp = as.numeric(str_remove(min_temp, coll("*"))),
+         precip = str_remove(precip, "G|I|H"),
+         precip = as.numeric(replace(precip, precip == 99.99, 0)),
+         cum_precip = cumsum(precip),
+         dayofleapyear = 1:length(station_id),
+         year = as.numeric(year),
+         month = as.numeric(month),
+         day = as.numeric(day),
+         station_id = as.character(station_id),
+         date = as.Date(paste(year, month, day, sep = "-")))
+
+last.date <- max(general.mitchell.2020$date)
+last.date.updated <- Sys.Date()
+
+normals <- read_rds("~/dropbox/projects/MilwaukeeWeather/GeneralMitchellNormals.rds")
+records <- read_rds("~/dropbox/projects/MilwaukeeWeather/GeneralMitchellDailyRecords_1941thru2019.rds")
+
+normal.month.breaks <- records %>% filter(!is.na(dayofleapyear)) %>% group_by(month) %>% filter(dayofleapyear == min(dayofleapyear)) %>% pull(dayofleapyear)
+normal.month.mids <- records %>% filter(!is.na(dayofleapyear)) %>% group_by(month) %>% summarise(dayofleapyear = median(dayofleapyear)) %>% pull(dayofleapyear)
+leapyear.month.breaks <- records %>% group_by(month) %>% filter(dayofleapyear == min(dayofleapyear)) %>% pull(dayofleapyear)
+leapyear.month.mids <- records %>% group_by(month) %>% summarise(dayofleapyear = median(dayofleapyear)) %>% pull(dayofleapyear)
+
+caption.text <- paste0("All data is from the General Mitchell International Airport weather station. ", 
+                       "It was last updated on ", last.date.updated, ". ",
+                       "Climatological normals and standard deviation were calculated by NOAA for the period 1981-2010. ",
+                       "Record values are calculated using each daily report from 1941 through 2019.")
+rain.subtitle.text <- paste0("2020 cumulative rainfall (black line) compared to climatological normal (gray line), ",
+                        "standard deviation (dark gray ribbon), and record (light gray ribbon) amounts. ",
+                        "Data is current through ", last.date, ".")
+
+# ytd precip
+rain.plot <- ggplot() +
+  # record high/low precipitation, ytd
+  geom_ribbon(data = records, aes(x = dayofleapyear,
+                                  ymin = low_cum_precip,
+                                  ymax = max_cum_precip),
+              alpha = 0.25) +
+  # standard deviation of high/low precipitation, ytd
+  geom_ribbon(data = normals, aes(x = dayofleapyear,
+                                  ymin = (precip - ytd_precip_sd),
+                                  ymax = (precip + ytd_precip_sd)),
+              alpha = 0.5) +
+  # normal precipitation, ytd
+  geom_line(data = normals, aes(dayofleapyear, precip),
+            color = "grey40", size = 1.5) +
+  # this year's precipitation, ytd
+  geom_line(data = general.mitchell.2020, aes(dayofleapyear, cum_precip),
+            size = 1.75) +
+  geom_vline(xintercept = leapyear.month.breaks, color = "aliceblue", size = 0.1) +
+  geom_hline(yintercept = c(0,10,20,30,40,50), color = "aliceblue", size = 0.1) +
+  # text data label
+  ggrepel::geom_label_repel(data = general.mitchell.2020 %>% filter(dayofleapyear == max(dayofleapyear)),
+                            aes(dayofleapyear, cum_precip, label = cum_precip),
+                            family = "serif", alpha = 0.75,
+                            point.padding = 1, nudge_y = 1) +
+  scale_x_continuous(breaks = leapyear.month.mids, labels = month.name,
+                     name = "month") +
+  scale_y_continuous(name = "inches") +
+  labs(title = "Year-to-date rainfall in Milwaukee",
+       subtitle = str_wrap(rain.subtitle.text, 120),
+       caption = str_wrap(caption.text, 145)) +
+  ggthemes::theme_tufte() +
+  theme(plot.background = element_rect(fill = "aliceblue"),
+        axis.ticks.x = element_blank(),
+        plot.title.position = "plot")
+
+high.subtitle.text <- paste0("2020 daily highs (black line) compared to climatological normal (gray line), ",
+                             "standard deviation (dark gray ribbon), and record (light gray ribbon) amounts. ",
+                             "Data is current through ", last.date, ".")
+
+temp.records <- inner_join(
+  general.mitchell.2020 %>% select(month, day, dayofleapyear, max_temp_20 = max_temp,
+                                   min_temp_20 = min_temp),
+  records %>% select(month, day, dayofleapyear, max_temp_record = max_temp,
+                     low_max_temp_record = low_max_temp,
+                     min_temp_record = min_temp,
+                     high_min_temp_record = high_min_temp)
+) %>%
+  mutate(is_max_temp_record = (max_temp_20 > max_temp_record),
+         is_low_max_temp_record = (max_temp_20 < low_max_temp_record),
+         is_low_temp_record = (min_temp_20 < min_temp_record),
+         is_high_min_temp_record = (min_temp_20 > high_min_temp_record)) %>%
+  select(month, day, dayofleapyear, starts_with("is_"),
+         max_temp_20, min_temp_20)
+
+# temperature
+high.temp.plot <- ggplot() +
+  # record highs
+  geom_ribbon(data = records, aes(x = dayofleapyear,
+                                  ymin = low_max_temp,
+                                  ymax = max_temp),
+              alpha = 0.25) +
+  # standard deviation of high temp
+  geom_ribbon(data = normals, aes(x = dayofleapyear,
+                                  ymin = (max_temp - max_temp_sd),
+                                  ymax = (max_temp + max_temp_sd)),
+              alpha = 0.5) +
+  # normal high temp
+  geom_line(data = normals, aes(dayofleapyear, max_temp),
+            color = "grey40", size = 1.5) +
+  # this year's high temp
+  geom_line(data = general.mitchell.2020, aes(dayofleapyear, max_temp),
+            size = 1) +
+  # records
+  geom_point(data = temp.records %>% filter(is_max_temp_record == TRUE),
+             aes(dayofleapyear, max_temp_20), color = "orangered4", alpha = 0.75) +
+  geom_point(data = temp.records %>% filter(is_low_max_temp_record == TRUE),
+             aes(dayofleapyear, max_temp_20), color = "royalblue4", alpha = 0.75) +
+  geom_vline(xintercept = normal.month.breaks, color = "aliceblue", size = 0.1) +
+  geom_hline(yintercept = c(-10,0,10,20,30,40,50,60,70,80,90,100),
+             color = "aliceblue", size = 0.1) +
+  scale_x_continuous(breaks = normal.month.mids, labels = month.name,
+                     name = "month") +
+  scale_y_continuous(name = "degrees", breaks = c(-10,0,10,20,30,40,50,60,70,80,90,100)) +
+  labs(title = "Daily high temperature in Milwaukee",
+       subtitle = str_wrap(high.subtitle.text, 120),
+       caption = str_wrap(caption.text, 145)) +
+  ggthemes::theme_tufte() +
+  theme(plot.background = element_rect(fill = "aliceblue"),
+        axis.ticks.x = element_blank(),
+        plot.title.position = "plot")
+
+low.subtitle.text <- paste0("2020 daily lows (black line) compared to climatological normal (gray line), ",
+                             "standard deviation (dark gray ribbon), and record (light gray ribbon) amounts. ",
+                             "Data is current through ", last.date, ".")
+
+low.temp.plot <- ggplot() +
+  # record lows
+  geom_ribbon(data = records, aes(x = dayofleapyear,
+                                  ymin = min_temp,
+                                  ymax = high_min_temp),
+              alpha = 0.25) +
+  # standard deviation of low temp
+  geom_ribbon(data = normals, aes(x = dayofleapyear,
+                                  ymin = (min_temp - min_temp_sd),
+                                  ymax = (min_temp + min_temp_sd)),
+              alpha = 0.5) +
+  # normal low temp
+  geom_line(data = normals, aes(dayofleapyear, min_temp),
+            color = "grey40", size = 1.5) +
+  # this year's low temp
+  geom_line(data = general.mitchell.2020, aes(dayofleapyear, min_temp),
+            size = 1) +
+  # records
+  geom_point(data = temp.records %>% filter(is_low_temp_record == TRUE),
+             aes(dayofleapyear, min_temp_20), color = "royalblue4", alpha = 0.75) +
+  geom_point(data = temp.records %>% filter(is_high_min_temp_record == TRUE),
+             aes(dayofleapyear, min_temp_20), color = "orangered4", alpha = 0.75) +
+  geom_vline(xintercept = leapyear.month.breaks, color = "aliceblue", size = 0.1) +
+  geom_hline(yintercept = c(-30,-20,-10,0,10,20,30,40,50,60,70,80,90),
+             color = "aliceblue", size = 0.1) +
+  scale_x_continuous(breaks = leapyear.month.mids, labels = month.name,
+                     name = "month") +
+  scale_y_continuous(name = "degrees", breaks = c(-30,-20,-10,0,10,20,30,40,50,60,70,80,90)) +
+  labs(title = "Daily low temperature in Milwaukee",
+       subtitle = str_wrap(low.subtitle.text, 120),
+       caption = str_wrap(caption.text, 145)) +
+  ggthemes::theme_tufte() +
+  theme(plot.background = element_rect(fill = "aliceblue"),
+        axis.ticks.x = element_blank(),
+        plot.title.position = "plot")
+
+```
+
+The National Oceanic and Atmospheric Association weather station at General Mitchell International Airport hasn't missed a daily weather report since 1941. These graphs show 2020 cumulative preciptiation, daily high temperature, and daily low compared to the past 79 years of weather reports at General Mitchell. The graphs show 2020 weather data through `r last.date`. The code was last run on `r last.date.updated`.
+
+Climatological normals were calculated by NOAA over the period 1981-2010. The record values presented in these graphs are simply the records recorded from 1941 through 2019 at this specific weather station. They are not necessarily the same as NOAA's official daily records for Milwaukee, which combine multiple weather stations and cover a longer period of time. Those are [available here](https://www.weather.gov/mkx/normal-records-mke_msn).
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.align='center'}
+rain.plot
+```
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.align='center'}
+high.temp.plot
+```
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.align='center'}
+low.temp.plot
+```

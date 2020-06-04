@@ -68,7 +68,13 @@ url = "mailto:jdjohn215@gmail.com"
   url = "/"
   
   [[menu.main]]
+  name = "Milwaukee Weather"
+  identifier = "MilwaukeeWeather"
+  weight = 400
+  url = "/MilwaukeeWeather/"
+  
+  [[menu.main]]
   name = "Resume"
   identfier = "Resume"
-  weight = 400
+  weight = 500
   url = "files/Resume_JDJ.html"
