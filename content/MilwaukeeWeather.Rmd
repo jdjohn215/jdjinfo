@@ -71,15 +71,17 @@ rain.plot <- ggplot() +
                             family = "serif", alpha = 0.75,
                             point.padding = 1, nudge_y = 1) +
   scale_x_continuous(breaks = leapyear.month.mids, labels = month.name,
-                     name = "month") +
-  scale_y_continuous(name = "inches") +
+                     name = "month", expand = expansion(0.01)) +
+  scale_y_continuous(name = "inches", sec.axis = dup_axis(name = NULL),
+                     expand = expansion(0.01)) +
   labs(title = "Year-to-date precipitation in Milwaukee",
        subtitle = str_wrap(rain.subtitle.text, 120),
        caption = str_wrap(caption.text, 145)) +
   ggthemes::theme_tufte() +
   theme(plot.background = element_rect(fill = "aliceblue"),
         axis.ticks.x = element_blank(),
-        plot.title.position = "plot")
+        plot.title.position = "plot",
+        axis.ticks.y = element_line(colour = "gray", size = 0.5))
 
 high.subtitle.text <- paste0("2020 daily highs (black line) compared to climatological normal (gray line), ",
                              "standard deviation (dark gray ribbon), and record (light gray ribbon) amounts. ",
@@ -127,15 +129,17 @@ high.temp.plot <- ggplot() +
   geom_hline(yintercept = c(-10,0,10,20,30,40,50,60,70,80,90,100),
              color = "aliceblue", size = 0.1) +
   scale_x_continuous(breaks = normal.month.mids, labels = month.name,
-                     name = "month") +
-  scale_y_continuous(name = "degrees", breaks = c(-10,0,10,20,30,40,50,60,70,80,90,100)) +
+                     name = "month", expand = expansion(0.01)) +
+  scale_y_continuous(name = "degrees", breaks = c(-10,0,10,20,30,40,50,60,70,80,90,100),
+                     expand = expansion(0.01), sec.axis = dup_axis(name = NULL)) +
   labs(title = "Daily high temperature in Milwaukee",
        subtitle = str_wrap(high.subtitle.text, 120),
        caption = str_wrap(caption.text, 145)) +
   ggthemes::theme_tufte() +
   theme(plot.background = element_rect(fill = "aliceblue"),
         axis.ticks.x = element_blank(),
-        plot.title.position = "plot")
+        plot.title.position = "plot",
+        axis.ticks.y = element_line(colour = "gray", size = 0.5))
 
 low.subtitle.text <- paste0("2020 daily lows (black line) compared to climatological normal (gray line), ",
                              "standard deviation (dark gray ribbon), and record (light gray ribbon) amounts. ",
@@ -167,15 +171,17 @@ low.temp.plot <- ggplot() +
   geom_hline(yintercept = c(-30,-20,-10,0,10,20,30,40,50,60,70,80,90),
              color = "aliceblue", size = 0.1) +
   scale_x_continuous(breaks = leapyear.month.mids, labels = month.name,
-                     name = "month") +
-  scale_y_continuous(name = "degrees", breaks = c(-30,-20,-10,0,10,20,30,40,50,60,70,80,90)) +
+                     name = "month", expand = expansion(0.01)) +
+  scale_y_continuous(name = "degrees", breaks = c(-30,-20,-10,0,10,20,30,40,50,60,70,80,90), 
+                     expand = expansion(0.01), sec.axis = dup_axis(name = NULL)) +
   labs(title = "Daily low temperature in Milwaukee",
        subtitle = str_wrap(low.subtitle.text, 120),
        caption = str_wrap(caption.text, 145)) +
   ggthemes::theme_tufte() +
   theme(plot.background = element_rect(fill = "aliceblue"),
         axis.ticks.x = element_blank(),
-        plot.title.position = "plot")
+        plot.title.position = "plot",
+        axis.ticks.y = element_line(colour = "gray", size = 0.5))
 
 ```
 
