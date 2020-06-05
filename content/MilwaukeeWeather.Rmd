@@ -78,7 +78,8 @@ rain.plot <- ggplot() +
        subtitle = str_wrap(rain.subtitle.text, 120),
        caption = str_wrap(caption.text, 145)) +
   ggthemes::theme_tufte() +
-  theme(plot.background = element_rect(fill = "aliceblue"),
+  theme(plot.background = element_rect(fill = "aliceblue",
+                                       color = "aliceblue"),
         axis.ticks.x = element_blank(),
         plot.title.position = "plot",
         axis.ticks.y = element_line(colour = "gray", size = 0.5))
@@ -136,7 +137,8 @@ high.temp.plot <- ggplot() +
        subtitle = str_wrap(high.subtitle.text, 120),
        caption = str_wrap(caption.text, 145)) +
   ggthemes::theme_tufte() +
-  theme(plot.background = element_rect(fill = "aliceblue"),
+  theme(plot.background = element_rect(fill = "aliceblue",
+                                       color = "aliceblue"),
         axis.ticks.x = element_blank(),
         plot.title.position = "plot",
         axis.ticks.y = element_line(colour = "gray", size = 0.5))
@@ -178,7 +180,8 @@ low.temp.plot <- ggplot() +
        subtitle = str_wrap(low.subtitle.text, 120),
        caption = str_wrap(caption.text, 145)) +
   ggthemes::theme_tufte() +
-  theme(plot.background = element_rect(fill = "aliceblue"),
+  theme(plot.background = element_rect(fill = "aliceblue",
+                                       color = "aliceblue"),
         axis.ticks.x = element_blank(),
         plot.title.position = "plot",
         axis.ticks.y = element_line(colour = "gray", size = 0.5))
