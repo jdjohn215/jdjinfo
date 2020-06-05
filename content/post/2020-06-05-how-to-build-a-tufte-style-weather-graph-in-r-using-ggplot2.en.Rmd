@@ -1,0 +1,342 @@
+---
+title: How to build a Tufte-style weather graph in R using ggplot2
+author: John D. Johnson
+date: '2020-06-05'
+slug: how-to-build-a-tufte-style-weather-graph-in-r-using-ggplot2
+categories:
+  - RStats
+tags: []
+Description: ''
+Tags: []
+Categories: []
+DisableComments: no
+---
+
+```{r setup, include=FALSE}
+library(knitr)
+library(tidyverse)
+knitr::opts_chunk$set(fig.width=8, fig.height=4.5) 
+
+
+general.mitchell.2020 <- read_table(file = "ftp://ftp.ncdc.noaa.gov/pub/data/gsod/2020/726400-14839-2020.op.gz") %>%
+  select(station_id = 1, 3, max_temp = MAX, min_temp = MIN, precip = PRCP) %>%
+  separate(YEARMODA, sep = c(4,6), into = c("year","month","day")) %>%
+  mutate(max_temp = as.numeric(str_remove(max_temp, coll("*"))),
+         min_temp = as.numeric(str_remove(min_temp, coll("*"))),
+         precip = str_remove(precip, "G|I|H"),
+         precip = as.numeric(replace(precip, precip == 99.99, 0)),
+         cum_precip = cumsum(precip),
+         dayofleapyear = 1:length(station_id),
+         year = as.numeric(year),
+         month = as.numeric(month),
+         day = as.numeric(day),
+         station_id = as.character(station_id),
+         date = as.Date(paste(year, month, day, sep = "-")))
+
+last.date <- max(general.mitchell.2020$date)
+last.date.updated <- Sys.Date()
+
+normals <- read_rds("~/dropbox/projects/MilwaukeeWeather/GeneralMitchellNormals.rds")
+records <- read_rds("~/dropbox/projects/MilwaukeeWeather/GeneralMitchellDailyRecords_1941thru2019.rds")
+
+normal.month.breaks <- records %>% filter(!is.na(dayofleapyear)) %>% group_by(month) %>% filter(dayofleapyear == min(dayofleapyear)) %>% pull(dayofleapyear)
+normal.month.mids <- records %>% filter(!is.na(dayofleapyear)) %>% group_by(month) %>% summarise(dayofleapyear = median(dayofleapyear)) %>% pull(dayofleapyear)
+leapyear.month.breaks <- records %>% group_by(month) %>% filter(dayofleapyear == min(dayofleapyear)) %>% pull(dayofleapyear)
+leapyear.month.mids <- records %>% group_by(month) %>% summarise(dayofleapyear = median(dayofleapyear)) %>% pull(dayofleapyear)
+
+caption.text <- paste0("All data is from the General Mitchell International Airport weather station. ", 
+                       "It was last updated on ", last.date.updated, ". ",
+                       "Climatological normals and standard deviation were calculated by NOAA for the period 1981-2010. ",
+                       "Record values are calculated using each daily report from 1941 through 2019.")
+rain.subtitle.text <- paste0("2020 cumulative rainfall (black line) compared to climatological normal (gray line), ",
+                        "standard deviation (dark gray ribbon), and record (light gray ribbon) amounts. ",
+                        "Data is current through ", last.date, ".")
+
+# ytd precip
+rain.plot <- ggplot() +
+  # record high/low precipitation, ytd
+  geom_ribbon(data = records, aes(x = dayofleapyear,
+                                  ymin = low_cum_precip,
+                                  ymax = max_cum_precip),
+              alpha = 0.25) +
+  # standard deviation of high/low precipitation, ytd
+  geom_ribbon(data = normals, aes(x = dayofleapyear,
+                                  ymin = (precip - ytd_precip_sd),
+                                  ymax = (precip + ytd_precip_sd)),
+              alpha = 0.5) +
+  # normal precipitation, ytd
+  geom_line(data = normals, aes(dayofleapyear, precip),
+            color = "grey40", size = 1.5) +
+  # this year's precipitation, ytd
+  geom_line(data = general.mitchell.2020, aes(dayofleapyear, cum_precip),
+            size = 1.5) +
+  geom_vline(xintercept = leapyear.month.breaks, color = "aliceblue", size = 0.1) +
+  geom_hline(yintercept = c(0,10,20,30,40,50), color = "aliceblue", size = 0.1) +
+  # text data label
+  ggrepel::geom_label_repel(data = general.mitchell.2020 %>% filter(dayofleapyear == max(dayofleapyear)),
+                            aes(dayofleapyear, cum_precip, label = cum_precip),
+                            family = "serif", alpha = 0.75,
+                            point.padding = 1, nudge_y = 1) +
+  scale_x_continuous(breaks = leapyear.month.mids, labels = month.name,
+                     name = "month", expand = expansion(0.01)) +
+  scale_y_continuous(name = "inches", sec.axis = dup_axis(name = NULL),
+                     expand = expansion(0.01)) +
+  labs(title = "Year-to-date precipitation in Milwaukee",
+       subtitle = str_wrap(rain.subtitle.text, 120),
+       caption = str_wrap(caption.text, 145)) +
+  ggthemes::theme_tufte() +
+  theme(plot.background = element_rect(fill = "aliceblue",
+                                       color = "aliceblue"),
+        axis.ticks.x = element_blank(),
+        plot.title.position = "plot",
+        axis.ticks.y = element_line(colour = "gray", size = 0.5))
+```
+
+This notebook contains all the code needed to create this graph.
+
+```{r, echo=FALSE}
+rain.plot
+```
+
+## Background
+
+I have been greatly influenced and inspired by [Edward Tufte's](https://rpubs.com/bradleyboehmke/weather_graphic) work on data visualization. When I was learning R, Bradley Boehmke's replication of Tufte's [daily temperature graph](https://rpubs.com/bradleyboehmke/weather_graphic) was a great help in getting a better grasp of the R packages `dplyr`, `tidyr`, and `ggplot2`. Quite a bit has changed in the `tidyverse` since Boehmke wrote that post in 2015. In this document, I aim to provide an updated demonstration of some `tidyverse` tools for data manipulation and visualization as well as some examples of how to pull data from the National Oceanic and Atmospheric Agency's FTP server.
+
+Unlike Boehmke's project, this graph does not directly replicate anything Edward Tufte has made. Instead I try to apply some of his principles of design to a different dataset--cumulative annual precipitation. In doing so, I made a set of aesthetic choices in making this graph which you may disagree with. Future me may disagree with them too, but by documenting the process of creating these graph in detail I hope I'll give you some new ideas on how to use `ggplot2`'s nearly infinite options to tweak graphs to your heart's content.
+
+## Getting the data
+This graph requires 3 datasets, all of them from a specific NOAA weather station.
+
+* current year (2020) daily precipitation counts
+* climatological normal year-to-date precipitation
+* daily record high and low year-to-date precipitation
+
+First, choose a weather station which has been around long enough for NOAA to calculate climatological normals. [Download the full list as a .txt file](ftp://ftp.ncdc.noaa.gov/pub/data/normals/1981-2010/station-inventories/allstations.txt). The first and last columns contain unique station IDs.
+
+I'm using the NOAA station at Milwaukee's primary airport, General Mitchell Intl (MKE). The station code is `USW00014839` and the district code is `726400`. 
+
+### current year weather reports
+
+All of the 2020 daily weather reports are available as individual files for each station in the directory `ftp://ftp.ncdc.noaa.gov/pub/data/gsod/2020/`. The URL for the MKE station is `ftp://ftp.ncdc.noaa.gov/pub/data/gsod/2020/726400-14839-2020.op.gz`. 
+
+This code downloads the data:
+
+```{r get2020, message=FALSE}
+general.mitchell.2020 <- read_table(file = "ftp://ftp.ncdc.noaa.gov/pub/data/gsod/2020/726400-14839-2020.op.gz") %>%
+  # just select station_id, date, and precipitation
+  select(station_id = 1, year_month_day = 3, precip = PRCP) %>%
+  separate(year_month_day, sep = c(4,6), into = c("year","month","day")) %>%
+  mutate(
+    # this removes the data quality flag
+    precip = str_remove(precip, "G|I|H"),
+    # values of 99.99 indicate missing value, replace with 0
+    precip = as.numeric(replace(precip, precip == 99.99, 0)),
+    # create cumulative precipitation
+    cum_precip_2020 = cumsum(precip),
+    # convert column classes
+    year = as.numeric(year),
+    month = as.numeric(month),
+    day = as.numeric(day),
+    station_id = as.character(station_id),
+    # create date variable
+    date = as.Date(paste(year, month, day, sep = "-"))) %>%
+  # just keep the variables we want
+  select(month, day, cum_precip_2020)
+head(general.mitchell.2020)
+```
+
+### climatological normals
+
+This code downloads the year-to-date precipitation normals for each weather station. After downloading, we filter for just the Milwaukee station.
+
+```{r getNormals, message=FALSE}
+precip.normals <- read_table("ftp://ftp.ncdc.noaa.gov/pub/data/normals/1981-2010/products/precipitation/ytd-prcp-normal.txt",
+                             col_names = c("station_id", "month", paste(1:31))) %>%
+  # pivot so that there is one row for each date
+  pivot_longer(names_to = "day", values_to = "precip",
+               cols = -c(station_id, month)) %>%
+  # extract the quality flag from end of precip (details in documentation)
+  mutate(quality_flag = str_sub(precip, -1),
+         # replace flag with NA when there is no letter flag
+         quality_flag = replace(quality_flag, ! quality_flag %in% c("C","P","Q","R","S"), NA),
+         # remove flags from precipitation
+         precip = str_remove(precip, "C|P|Q|R|S"),
+         # convert classes
+         day = as.numeric(day),
+         month = as.numeric(month),
+         precip = as.numeric(precip)) %>%
+  # remove dates that don't exists
+  filter(precip != -8888) %>%
+  # convert precipitation to inches
+  mutate(precip = precip/100,
+         precip = replace(precip, precip < 0, NA),
+         # replace cumprecip is missing with the previous day's value
+         precip = zoo::na.locf(precip)) %>%
+  # filter for the desired station
+  filter(station_id == "USW00014839") %>%
+  select(-quality_flag)
+head(precip.normals)
+```
+
+### records
+
+As far as I know, NOAA doesn't provide a dataset with station records, so I had to calculate this myself. You could download each annual file from NOAA's FTP server by changing the year in the file path above, or you could use NOAA's [data download user interface](https://www.ncdc.noaa.gov/cdo-web/datatools/lcd). Once you've acquired the data, calculate the cumulative year-to-date precipitation for each day, then group by day of year. Calculate the standard deviation using just the years 1981-2010, because this is the 30-year period used to calculate the climatological normals retrieved above. Your output should look something like this. You can also download this file using the provided dropbox link.
+
+```{r getRecords, message=FALSE}
+precip.records <- read_rds(url("https://www.dropbox.com/s/62w9jtx5inae3l8/MKE_precip_records.rds?dl=1"))
+head(precip.records)
+```
+
+### combine the data
+
+Join the three `data.frames` by month and day, then create a day-of-year variable.
+
+```{r joinData, message=FALSE}
+all.precip.data <- inner_join(precip.normals, precip.records) %>%
+  left_join(general.mitchell.2020) %>%
+  mutate(dayofleapyear = 1:length(station_id))
+head(all.precip.data)
+```
+
+Create some helpful vectors for the x-axis lines and labels.
+
+```{r xAxis, message=FALSE}
+leapyear.month.breaks <- all.precip.data %>% 
+  group_by(month) %>% 
+  filter(dayofleapyear == min(dayofleapyear)) %>% 
+  pull(dayofleapyear)
+leapyear.month.mids <- all.precip.data %>% 
+  group_by(month) %>% 
+  summarise(dayofleapyear = median(dayofleapyear)) %>% 
+  pull(dayofleapyear)
+```
+
+## Building the plot
+
+
+```{r rainPlot, warning=FALSE, message=FALSE}
+p <- ggplot(all.precip.data) +
+  ggthemes::theme_tufte() +
+  theme(plot.background = element_rect(fill = "aliceblue",
+                                       colour = "aliceblue"))
+p
+```
+
+Begin adding the data. First, I plot the record values as a ribbon. The `alpha` value controls the opacity of the ribbon. I could also control the relative darkness of the ribbons by assigning them different colors, but in this case setting the transparency was a good shortcut.
+
+```{r, warning=FALSE, message=FALSE}
+p <- p + 
+  geom_ribbon(aes(x = dayofleapyear,
+                  ymin = low_cum_precip,
+                  ymax = max_cum_precip),
+              alpha = 0.25)
+p
+```
+
+Add a ribbon for the standard deviation.
+
+```{r, warning=FALSE, message=FALSE}
+p <- p +
+  geom_ribbon(aes(x = dayofleapyear,
+                  ymin = (precip - ytd_precip_sd),
+                  ymax = (precip + ytd_precip_sd)),
+              alpha = 0.5)
+p
+```
+
+Add a line for the climatological normal value.
+
+```{r, warning=FALSE, message=FALSE}
+p <- p +
+  geom_line(aes(x = dayofleapyear,
+                y = precip),
+            color = "gray40",
+            size = 1.5)
+p
+```
+
+Add this year's data.
+```{r, warning=FALSE, message=FALSE}
+p <- p +
+  geom_line(aes(x = dayofleapyear,
+                y = cum_precip_2020),
+            size = 1.5)
+p
+```
+
+Add the gridlines. By inserting custom gridlines on top of the data and the same color as the background, I make the grid only appear on top of the data as negative space.
+
+```{r, warning=FALSE, message=FALSE}
+p <- p +
+  geom_vline(xintercept = leapyear.month.breaks,
+             color = "aliceblue",
+             size = 0.1) +
+  geom_hline(yintercept = c(0,10,20,30,40,50),
+             color = "aliceblue",
+             size = 0.1)
+p
+```
+
+Edit the axis text.
+
+```{r, warning=FALSE, message=FALSE}
+p <- p +
+  scale_x_continuous(breaks = leapyear.month.mids,
+                     labels = month.name,
+                     name = "month",
+                     expand = expansion(0.01)) +
+  scale_y_continuous(breaks = c(0,10,20,30,40,50),
+                     name = "inches",
+                     sec.axis = dup_axis(name = NULL),
+                     expand = expansion(0.01))
+p
+```
+
+Add the explanatory text. I find it's often easier to assign long labels to object outside the `ggplot` object, then include it in the graph's code using `stringr::str_wrap`.
+
+```{r, warning=FALSE, message=FALSE}
+caption.text <- paste0("All data is from the General Mitchell International Airport weather station. ", 
+                       "It was last updated on ", last.date.updated, ". ",
+                       "Climatological normals and standard deviation were calculated by NOAA for the period 1981-2010. ",
+                       "Record values are calculated using each daily report from 1941 through 2019.")
+rain.subtitle.text <- paste0("2020 cumulative rainfall (black line) compared to climatological normal (gray line), ",
+                        "standard deviation (dark gray ribbon), and record (light gray ribbon) amounts. ",
+                        "Data is current through ", last.date, ".")
+p <- p +
+  labs(title = "Year-to-date precipitation in Milwaukee",
+       subtitle = str_wrap(rain.subtitle.text, 120),
+       caption = str_wrap(caption.text, 145))
+p
+```
+
+Add a text label for the most recent data point. The package `ggrepel` helpfully adds some padding to the point. It's not necessary in this case since I'm only labelling a single point, but it is extremely helpful when you have multiple points and don't want to specify the label position for each one.
+
+The bit of code `data = function(x){...}` subsets the `data.frame` from way back in the original `ggplot` line for the last day of available 2020 data.
+
+```{r, warning=FALSE, message=FALSE}
+p <- p +
+  ggrepel::geom_label_repel(data = function(x){
+    x %>%
+      filter(!is.na(cum_precip_2020)) %>%
+      filter(dayofleapyear == max(dayofleapyear))
+  },
+  aes(x = dayofleapyear, 
+      y = cum_precip_2020,
+      label = cum_precip_2020),
+  family = "serif",
+  alpha = 0.75,
+  point.padding = 1,
+  nudge_y = 1)
+p
+```
+
+Finally, tweak the appearance of the axes and change the alignment of the plot's title and subtitle.
+
+```{r, warning=FALSE, message=FALSE}
+p <- p +
+  theme(axis.ticks.x = element_blank(),
+        plot.title.position = "plot",
+        axis.ticks.y = element_line(color = "gray",
+                                    size = 0.5))
+p
+```
