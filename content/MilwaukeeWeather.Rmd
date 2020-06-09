@@ -8,7 +8,7 @@ output: html_document
 ```{r setup, include=FALSE}
 library(knitr)
 library(tidyverse)
-knitr::opts_chunk$set(fig.width=8, fig.height=4.5) 
+knitr::opts_chunk$set(fig.width=8, fig.height=4.5)
 
 
 general.mitchell.2020 <- read_table(file = "ftp://ftp.ncdc.noaa.gov/pub/data/gsod/2020/726400-14839-2020.op.gz") %>%
