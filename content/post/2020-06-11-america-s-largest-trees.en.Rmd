@@ -1,0 +1,19 @@
+---
+title: America's largest trees
+author: John D. Johnson
+date: '2020-06-11'
+slug: champion-trees
+categories:
+  - United States
+tags: []
+Description: ''
+Tags: []
+Categories: []
+DisableComments: no
+---
+
+The largest tree of its species is called a "Champion Tree." The nonprofit American Forests has run a [competition to identify national champion trees](https://www.americanforests.org/get-involved/americas-biggest-trees/) in the United States for the past 80 years. This map shows the locations of each tree in 2019.
+
+Just four states--North Dakota, South Dakota, Rhode Island, and Wisconsin--have no champion trees. Florida has the most (106), followed by Virginia (90), Texas (77) and Arizona and California (both 58).
+
+![](/post/2020-06-11-america-s-largest-trees.en_files/ChampionTreesMap.png)
