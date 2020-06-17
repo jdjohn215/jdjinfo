@@ -1,0 +1,168 @@
+---
+title: Neighborhoods where Milwaukee isn't segregated
+author: John D. Johnson
+date: '2020-06-17'
+slug: milwaukee-neighborhoods-race-2018
+categories:
+  - Milwaukee
+tags: []
+Description: ''
+Tags: []
+Categories: []
+DisableComments: no
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(knitr)
+library(tidyverse)
+library(reactable)
+library(leaflet)
+library(sf)
+
+d <- read_rds("~/Dropbox/Projects/2020/June/MKE_neighborhoods_race/MilwaukeeNeighborhoodsByRace.rds")
+
+plurality <- d %>%
+  group_by(neighborhood) %>%
+  filter(pct == max(pct)) %>%
+  mutate(plurality = race)
+
+majority <- plurality %>%
+  mutate(plurality = replace(plurality, pct <= 50, "no majority")) %>%
+  rename(majority = plurality)
+
+plurality %>% group_by(race) %>% summarise(neighborhoods = n())
+majority %>% group_by(race) %>% summarise(neighborhoods = n())
+no.majority <- majority %>% filter(majority == "no majority") %>%
+  arrange(desc(total_pop)) %>%
+  pull(neighborhood) %>%
+  str_to_title()
+
+d2 <- inner_join(d, majority %>% select(neighborhood, majority)) %>%
+  inner_join(plurality %>% select(neighborhood, plurality, plurality_pct = pct)) %>%
+  select(-pop) %>%
+  mutate(race = str_to_title(race)) %>%
+  pivot_wider(names_from = race, values_from = pct) %>%
+  mutate(`All others` = (100 - Asian - Black - Latino - White)) %>%
+  ungroup() %>%
+  mutate(label = paste0('<p>', htmltools::htmlEscape(str_to_title(neighborhood)), '<p></p>', 
+                         htmltools::htmlEscape(paste("Total pop:", prettyNum(round(total_pop),
+                                                                             big.mark = ","))), '</p><p>',
+                         htmltools::htmlEscape(paste("majority:", str_to_title(majority))), '</p><p>',
+                         htmltools::htmlEscape(paste(paste0(round(Asian),"%"), "Asian")),'</p><p>',
+                         htmltools::htmlEscape(paste(paste0(round(Black),"%"), "Black")),'</p><p>',
+                         htmltools::htmlEscape(paste(paste0(round(Latino),"%"), "Latino")),'</p><p>',
+                         htmltools::htmlEscape(paste(paste0(round(White),"%"), "White")),'</p><p>',
+                         htmltools::htmlEscape(paste(paste0(round(`All others`),"%"), "Others")), '</p>'))
+
+nhood.shape <- st_read("~/Dropbox/Projects/SHPfiles/neighborhood/neighborhood.shp") %>%
+  select(neighborhood = NEIGHBORHD) %>%
+  inner_join(d2) %>%
+  st_transform(crs = 4326)
+```
+
+Milwaukee's pervasive segregation is infamous, but it doesn't extend everywhere. [Brown University’s American Communities Project](https://s4.ad.brown.edu/Projects/Diversity/SegSorting/Default.aspx) ranked the metro in 2010 as 2nd in Black/white segregation, 13th in Latino/white segregation, and 116th in Asian/white segregation. The metro area includes all of Milwaukee County plus neighboring, Ozaukee, Washington, and Waukesha counties, but the situation is scarcely better [within city limits](https://s4.ad.brown.edu/Projects/Diversity/SegCitySorting/Default.aspx). In fact it's worse for Latino/white and Asian/white segregation. The City of Milwaukee ranked 10th in Black/white segregation, 8th in Latino/white segregation, and 16th in Asian/white segregation.
+
+Still, not all of Milwaukee's neighborhoods are characterized by racial segregation. Among [Milwaukee's 186 neighborhoods](https://city.milwaukee.gov/Neighborhoods), 73 have a Black majority, 72 have a white majority, 14 are majority Latino, and 27 have no majority group. I calculated these statistics by (dis)aggregating data from the 2018 5-year American Community Survey into neighborhood boundaries using [the methodology described here](https://github.com/jdjohn215/Milwaukee-Geo-Crosswalks). Similarily, Piggsville (also called "The Valley") has 36% Black residents, 34% white, 16% Latino, and 11% Asian.
+
+The 27 neighborhoods without a majority group are, arranged in descending order by total population, `r paste(no.majority)`.
+
+The most integrated neighborhoods are Little Menomonee Parkway (on the Northwest side) and Piggsville (near Miller Park). The residents of Little Menomonee Parkway are 35% Black, 35% white, 15% Latino, 8% something else, and 7% Asian.
+
+The statistics for each neighborhood are presented in the table below.
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+d %>%
+  filter(race != "native") %>%
+  mutate(race = str_to_title(race),
+         neighborhood = str_to_title(neighborhood),
+         total_pop = round(total_pop)) %>%
+  select(-pop) %>%
+  pivot_wider(names_from = race, values_from = pct) %>%
+  mutate(`All others` = (100 - Asian - Black - Latino - White)) %>%
+  mutate_if(is.numeric, round) %>%
+  rename("Total pop." = 2,
+         "Neighborhood" = 1) %>%
+  reactable(striped = TRUE,
+            showPageSizeOptions = TRUE,
+            filterable = TRUE,
+            sortable = TRUE,
+            columns = list(
+              `Total pop.` = colDef(format = colFormat(separators = TRUE)),
+              Asian = colDef(format = colFormat(suffix = "%")),
+              Black = colDef(format = colFormat(suffix = "%")),
+              Latino = colDef(format = colFormat(suffix = "%")),
+              White = colDef(format = colFormat(suffix = "%")),
+              `All others` = colDef(format = colFormat(suffix = "%"))
+            ))
+```
+
+Move your mouse over this map to see the statistics from the table above.
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.height=11, fig.align='center'}
+green.pal <- colorNumeric(
+  palette = colorRampPalette(colors = c("#bae4b3", "#006d2c"))(length(d2$plurality_pct)),
+  domain = d2$plurality_pct
+)
+
+blue.pal <- colorNumeric(
+  palette = colorRampPalette(colors = c("#bdd7e7", "#08519c"))(length(d2$plurality_pct)),
+  domain = d2$plurality_pct
+)
+
+purple.pal <- colorNumeric(
+  palette = colorRampPalette(colors = c("#cbc9e2", "#54278f"))(length(d2$plurality_pct)),
+  domain = d2$plurality_pct
+)
+
+red.pal <- colorNumeric(
+  palette = colorRampPalette(colors = c("#fcae91", "#a50f15"))(length(d2$plurality_pct)),
+  domain = d2$plurality_pct
+)
+
+leaflet() %>%
+  setView(lat = 43.06, lng = -87.96, zoom = 12) %>%
+  addProviderTiles("Stamen.TonerLite") %>%
+  addPolygons(
+    data = nhood.shape %>% filter(majority == "black"),
+    fillColor = ~green.pal(plurality_pct),
+    weight = 0,
+    fillOpacity = 0.5,
+    label = ~lapply(label, htmltools::HTML),
+    popup = ~lapply(label, htmltools::HTML),
+    highlightOptions = highlightOptions(fillOpacity = 0.7,
+                                        bringToFront = TRUE)
+  ) %>%
+  addPolygons(
+    data = nhood.shape %>% filter(majority == "white"),
+    fillColor = ~blue.pal(plurality_pct),
+    weight = 0,
+    fillOpacity = 0.5,
+    label = ~lapply(label, htmltools::HTML),
+    popup = ~lapply(label, htmltools::HTML),
+    highlightOptions = highlightOptions(fillOpacity = 0.7,
+                                        bringToFront = TRUE)
+  ) %>%
+  addPolygons(
+    data = nhood.shape %>% filter(majority == "latino"),
+    fillColor = ~purple.pal(plurality_pct),
+    weight = 0,
+    fillOpacity = 0.5,
+    label = ~lapply(label, htmltools::HTML),
+    popup = ~lapply(label, htmltools::HTML),
+    highlightOptions = highlightOptions(fillOpacity = 0.7,
+                                        bringToFront = TRUE)
+  ) %>%
+  addPolygons(
+    data = nhood.shape %>% filter(majority == "no majority"),
+    fillColor = ~red.pal(plurality_pct),
+    weight = 0,
+    fillOpacity = 0.5,
+    label = ~lapply(label, htmltools::HTML),
+    popup = ~lapply(label, htmltools::HTML),
+    highlightOptions = highlightOptions(fillOpacity = 0.7,
+                                        bringToFront = TRUE)
+  )
+
+```
