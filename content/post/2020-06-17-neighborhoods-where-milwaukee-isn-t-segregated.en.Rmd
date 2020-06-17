@@ -24,6 +24,7 @@ library(sf)
 d <- read_rds("~/Dropbox/Projects/2020/June/MKE_neighborhoods_race/MilwaukeeNeighborhoodsByRace.rds")
 
 plurality <- d %>%
+  filter(total_pop > 99) %>%
   group_by(neighborhood) %>%
   filter(pct == max(pct)) %>%
   mutate(plurality = race)
@@ -32,8 +33,8 @@ majority <- plurality %>%
   mutate(plurality = replace(plurality, pct <= 50, "no majority")) %>%
   rename(majority = plurality)
 
-plurality %>% group_by(race) %>% summarise(neighborhoods = n())
-majority %>% group_by(race) %>% summarise(neighborhoods = n())
+plurality %>% group_by(plurality) %>% summarise(neighborhoods = n())
+majority %>% group_by(majority) %>% summarise(neighborhoods = n())
 no.majority <- majority %>% filter(majority == "no majority") %>%
   arrange(desc(total_pop)) %>%
   pull(neighborhood) %>%
@@ -64,9 +65,9 @@ nhood.shape <- st_read("~/Dropbox/Projects/SHPfiles/neighborhood/neighborhood.sh
 
 Milwaukee's pervasive segregation is infamous, but it doesn't extend everywhere. [Brown University’s American Communities Project](https://s4.ad.brown.edu/Projects/Diversity/SegSorting/Default.aspx) ranked the metro in 2010 as 2nd in Black/white segregation, 13th in Latinx/white segregation, and 116th in Asian/white segregation. The metro area includes all of Milwaukee County plus neighboring, Ozaukee, Washington, and Waukesha counties, but the situation is scarcely better [within city limits](https://s4.ad.brown.edu/Projects/Diversity/SegCitySorting/Default.aspx). In fact it's worse for Latinx/white and Asian/white segregation. The City of Milwaukee ranked 10th in Black/white segregation, 8th in Latinx/white segregation, and 16th in Asian/white segregation.
 
-Still, not all of Milwaukee's neighborhoods are characterized by racial segregation. Among [Milwaukee's 186 neighborhoods](https://city.milwaukee.gov/Neighborhoods), 73 have a (non-Latinx) Black majority, 72 have a (non-Latinx) white majority, 14 are majority Latinx (of any race), and 27 have no majority group. Between 4 and 5 percent of Milwaukee's population is Asian, but Asian residents do not make up a majority of any individual neighborhood's population. I calculated these statistics by (dis)aggregating data from the 2018 5-year American Community Survey into neighborhood boundaries using [the methodology described here](https://github.com/jdjohn215/Milwaukee-Geo-Crosswalks). Similarily, Piggsville (also called "The Valley") has 36% Black residents, 34% white, 16% Latinx, and 11% Asian.[^1]
+Still, not all of Milwaukee's neighborhoods are characterized by racial segregation. Among [Milwaukee's 181 neighborhoods](https://city.milwaukee.gov/Neighborhoods) with at least 100 residents, 72 have a (non-Latinx) Black majority, 70 have a (non-Latinx) white majority, 14 are majority Latinx (of any race), and 25 have no majority group. Between 4 and 5 percent of Milwaukee's population is Asian, but Asian residents do not make up a majority of any individual neighborhood's population. I calculated these statistics by (dis)aggregating data from the 2018 5-year American Community Survey into neighborhood boundaries using [the methodology described here](https://github.com/jdjohn215/Milwaukee-Geo-Crosswalks). Similarily, Piggsville (also called "The Valley") has 36% Black residents, 34% white, 16% Latinx, and 11% Asian.[^1]
 
-The 27 neighborhoods without a majority group are arranged in descending order by total population as follows: `r paste(no.majority)`.
+The 25 neighborhoods without a majority group are arranged in descending order by total population as follows: `r paste(no.majority)`.
 
 The most integrated neighborhoods are Little Menomonee Parkway (on the Northwest side) and Piggsville (near Miller Park). The residents of Little Menomonee Parkway are 35% Black, 35% white, 15% Latinx, 8% something else, and 7% Asian.
 
