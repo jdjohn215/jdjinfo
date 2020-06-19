@@ -18,128 +18,19 @@ DisableComments: no
 <p><img src="/post/2020-06-05-how-to-build-a-tufte-style-weather-graph-in-r-using-ggplot2.en_files/figure-html/unnamed-chunk-1-1.png" width="768" /></p>
 <div id="background" class="section level2">
 <h2>Background</h2>
-<p>I have been greatly influenced and inspired by <a href="https://rpubs.com/bradleyboehmke/weather_graphic">Edward Tufte’s</a> work on data visualization. When I was learning R, Bradley Boehmke’s replication of Tufte’s <a href="https://rpubs.com/bradleyboehmke/weather_graphic">daily temperature graph</a> was a great help in getting a better grasp of the R packages <code>dplyr</code>, <code>tidyr</code>, and <code>ggplot2</code>. Quite a bit has changed in the <code>tidyverse</code> since Boehmke wrote that post in 2015. In this document, I aim to provide an updated demonstration of some <code>tidyverse</code> tools for data manipulation and visualization as well as some examples of how to pull data from the National Oceanic and Atmospheric Agency’s FTP server.</p>
+<p>I have been greatly influenced by <a href="https://rpubs.com/bradleyboehmke/weather_graphic">Edward Tufte’s</a> work on data visualization. When I was learning R, Bradley Boehmke’s replication of Tufte’s <a href="https://rpubs.com/bradleyboehmke/weather_graphic">daily temperature graph</a> was a great help in getting a better grasp of the R packages <code>dplyr</code>, <code>tidyr</code>, and <code>ggplot2</code>. Quite a bit has changed in the <code>tidyverse</code> since Boehmke wrote that post in 2015. In this document, I aim to provide an updated demonstration of some <code>tidyverse</code> tools for data manipulation and visualization as well as some examples of how to pull data from the National Oceanic and Atmospheric Agency’s FTP server.</p>
 <p>Unlike Boehmke’s project, this graph does not directly replicate anything Edward Tufte has made. Instead I try to apply some of his principles of design to a different dataset–cumulative annual precipitation. In doing so, I made a set of aesthetic choices in making this graph which you may disagree with. Future me may disagree with them too, but by documenting the process of creating these graph in detail I hope I’ll give you some new ideas on how to use <code>ggplot2</code>’s nearly infinite options to tweak graphs to your heart’s content.</p>
 </div>
-<div id="getting-the-data" class="section level2">
-<h2>Getting the data</h2>
-<p>This graph requires 3 datasets, all of them from a specific NOAA weather station.</p>
-<ul>
-<li>current year (2020) daily precipitation counts</li>
-<li>climatological normal year-to-date precipitation</li>
-<li>daily record high and low year-to-date precipitation</li>
-</ul>
-<p>First, choose a weather station which has been around long enough for NOAA to calculate climatological normals. <a href="ftp://ftp.ncdc.noaa.gov/pub/data/normals/1981-2010/station-inventories/allstations.txt">Download the full list as a .txt file</a>. The first and last columns contain unique station IDs.</p>
-<p>I’m using the NOAA station at Milwaukee’s primary airport, General Mitchell Intl (MKE). The station code is <code>USW00014839</code> and the district code is <code>726400</code>.</p>
-<div id="current-year-weather-reports" class="section level3">
-<h3>current year weather reports</h3>
-<p>All of the 2020 daily weather reports are available as individual files for each station in the directory <code>ftp://ftp.ncdc.noaa.gov/pub/data/gsod/2020/</code>. The URL for the MKE station is <code>ftp://ftp.ncdc.noaa.gov/pub/data/gsod/2020/726400-14839-2020.op.gz</code>.</p>
-<p>This code downloads the data:</p>
-<pre class="r"><code>general.mitchell.2020 &lt;- read_table(file = &quot;ftp://ftp.ncdc.noaa.gov/pub/data/gsod/2020/726400-14839-2020.op.gz&quot;) %&gt;%
-  # just select station_id, date, and precipitation
-  select(station_id = 1, year_month_day = 3, precip = PRCP) %&gt;%
-  separate(year_month_day, sep = c(4,6), into = c(&quot;year&quot;,&quot;month&quot;,&quot;day&quot;)) %&gt;%
-  mutate(
-    # this removes the data quality flag
-    precip = str_remove(precip, &quot;G|I|H&quot;),
-    # values of 99.99 indicate missing value, replace with 0
-    precip = as.numeric(replace(precip, precip == 99.99, 0)),
-    # create cumulative precipitation
-    cum_precip_2020 = cumsum(precip),
-    # convert column classes
-    year = as.numeric(year),
-    month = as.numeric(month),
-    day = as.numeric(day),
-    station_id = as.character(station_id),
-    # create date variable
-    date = as.Date(paste(year, month, day, sep = &quot;-&quot;))) %&gt;%
-  # just keep the variables we want
-  select(month, day, cum_precip_2020)</code></pre>
-<pre><code>## Warning: Missing column names filled in: &#39;X5&#39; [5], &#39;X7&#39; [7], &#39;X9&#39; [9],
-## &#39;X11&#39; [11], &#39;X13&#39; [13], &#39;X15&#39; [15]</code></pre>
-<pre class="r"><code>head(general.mitchell.2020)</code></pre>
-<pre><code>## # A tibble: 6 x 3
-##   month   day cum_precip_2020
-##   &lt;dbl&gt; &lt;dbl&gt;           &lt;dbl&gt;
-## 1     1     1            0.06
-## 2     1     2            0.06
-## 3     1     3            0.06
-## 4     1     4            0.06
-## 5     1     5            0.06
-## 6     1     6            0.06</code></pre>
+<div id="data" class="section level2">
+<h2>Data</h2>
+<p>I’ve pre-processed the data needed for this plot, and you can download it using the code below. If you want to make this graph for a different weather station, please refer to <a href="https://johndjohnson.info/post/retrieving-precipitation-data-from-noaa/">this post</a> for a demonstration of how to retrieve and process this data from NOAA.</p>
+<pre><code>library(tidyverse)
+
+all.precip.data &lt;- read_csv(&quot;https://johndjohnson.info/files/MilwaukeePrecipitationData2020.csv&quot;)</code></pre>
 </div>
-<div id="climatological-normals" class="section level3">
-<h3>climatological normals</h3>
-<p>This code downloads the year-to-date precipitation normals for each weather station. After downloading, we filter for just the Milwaukee station.</p>
-<pre class="r"><code>precip.normals &lt;- read_table(&quot;ftp://ftp.ncdc.noaa.gov/pub/data/normals/1981-2010/products/precipitation/ytd-prcp-normal.txt&quot;,
-                             col_names = c(&quot;station_id&quot;, &quot;month&quot;, paste(1:31))) %&gt;%
-  # pivot so that there is one row for each date
-  pivot_longer(names_to = &quot;day&quot;, values_to = &quot;precip&quot;,
-               cols = -c(station_id, month)) %&gt;%
-  # extract the quality flag from end of precip (details in documentation)
-  mutate(quality_flag = str_sub(precip, -1),
-         # replace flag with NA when there is no letter flag
-         quality_flag = replace(quality_flag, ! quality_flag %in% c(&quot;C&quot;,&quot;P&quot;,&quot;Q&quot;,&quot;R&quot;,&quot;S&quot;), NA),
-         # remove flags from precipitation
-         precip = str_remove(precip, &quot;C|P|Q|R|S&quot;),
-         # convert classes
-         day = as.numeric(day),
-         month = as.numeric(month),
-         precip = as.numeric(precip)) %&gt;%
-  # remove dates that don&#39;t exists
-  filter(precip != -8888) %&gt;%
-  # convert precipitation to inches
-  mutate(precip = precip/100,
-         precip = replace(precip, precip &lt; 0, NA),
-         # replace cumprecip is missing with the previous day&#39;s value
-         precip = zoo::na.locf(precip)) %&gt;%
-  # filter for the desired station
-  filter(station_id == &quot;USW00014839&quot;) %&gt;%
-  select(-quality_flag)
-head(precip.normals)</code></pre>
-<pre><code>## # A tibble: 6 x 4
-##   station_id  month   day precip
-##   &lt;chr&gt;       &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt;
-## 1 USW00014839     1     1   0.06
-## 2 USW00014839     1     2   0.12
-## 3 USW00014839     1     3   0.18
-## 4 USW00014839     1     4   0.24
-## 5 USW00014839     1     5   0.3 
-## 6 USW00014839     1     6   0.36</code></pre>
-</div>
-<div id="records" class="section level3">
-<h3>records</h3>
-<p>As far as I know, NOAA doesn’t provide a dataset with station records, so I had to calculate this myself. You could download each annual file from NOAA’s FTP server by changing the year in the file path above, or you could use NOAA’s <a href="https://www.ncdc.noaa.gov/cdo-web/datatools/lcd">data download user interface</a>. Once you’ve acquired the data, calculate the cumulative year-to-date precipitation for each day, then group by day of year. Calculate the standard deviation using just the years 1981-2010, because this is the 30-year period used to calculate the climatological normals retrieved above. Your output should look something like this. You can also download this file using the provided dropbox link.</p>
-<pre class="r"><code>precip.records &lt;- read_rds(url(&quot;https://www.dropbox.com/s/62w9jtx5inae3l8/MKE_precip_records.rds?dl=1&quot;))
-head(precip.records)</code></pre>
-<pre><code>## # A tibble: 6 x 5
-##   month   day ytd_precip_sd max_cum_precip low_cum_precip
-##   &lt;dbl&gt; &lt;dbl&gt;         &lt;dbl&gt;          &lt;dbl&gt;          &lt;dbl&gt;
-## 1     1     1         0.202           1.11              0
-## 2     1     2         0.333           1.25              0
-## 3     1     3         0.346           1.26              0
-## 4     1     4         0.427           1.41              0
-## 5     1     5         0.436           1.41              0
-## 6     1     6         0.470           1.58              0</code></pre>
-</div>
-<div id="combine-the-data" class="section level3">
-<h3>combine the data</h3>
-<p>Join the three <code>data.frames</code> by month and day, then create a day-of-year variable.</p>
-<pre class="r"><code>all.precip.data &lt;- inner_join(precip.normals, precip.records) %&gt;%
-  left_join(general.mitchell.2020) %&gt;%
-  mutate(dayofleapyear = 1:length(station_id))
-head(all.precip.data)</code></pre>
-<pre><code>## # A tibble: 6 x 9
-##   station_id month   day precip ytd_precip_sd max_cum_precip low_cum_precip
-##   &lt;chr&gt;      &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt;         &lt;dbl&gt;          &lt;dbl&gt;          &lt;dbl&gt;
-## 1 USW000148…     1     1   0.06         0.202           1.11              0
-## 2 USW000148…     1     2   0.12         0.333           1.25              0
-## 3 USW000148…     1     3   0.18         0.346           1.26              0
-## 4 USW000148…     1     4   0.24         0.427           1.41              0
-## 5 USW000148…     1     5   0.3          0.436           1.41              0
-## 6 USW000148…     1     6   0.36         0.470           1.58              0
-## # … with 2 more variables: cum_precip_2020 &lt;dbl&gt;, dayofleapyear &lt;int&gt;</code></pre>
-<p>Create some helpful vectors for the x-axis lines and labels.</p>
+<div id="building-the-plot" class="section level2">
+<h2>Building the plot</h2>
+<p>Before beginning, create some helpful vectors for the x-axis lines and labels.</p>
 <pre class="r"><code>leapyear.month.breaks &lt;- all.precip.data %&gt;% 
   group_by(month) %&gt;% 
   filter(dayofleapyear == min(dayofleapyear)) %&gt;% 
@@ -148,10 +39,6 @@ leapyear.month.mids &lt;- all.precip.data %&gt;%
   group_by(month) %&gt;% 
   summarise(dayofleapyear = median(dayofleapyear)) %&gt;% 
   pull(dayofleapyear)</code></pre>
-</div>
-</div>
-<div id="building-the-plot" class="section level2">
-<h2>Building the plot</h2>
 <pre class="r"><code>p &lt;- ggplot(all.precip.data) +
   ggthemes::theme_tufte() +
   theme(plot.background = element_rect(fill = &quot;aliceblue&quot;,
@@ -169,15 +56,15 @@ p</code></pre>
 <p>Add a ribbon for the standard deviation.</p>
 <pre class="r"><code>p &lt;- p +
   geom_ribbon(aes(x = dayofleapyear,
-                  ymin = (precip - ytd_precip_sd),
-                  ymax = (precip + ytd_precip_sd)),
+                  ymin = (normal_precip - ytd_precip_sd),
+                  ymax = (normal_precip + ytd_precip_sd)),
               alpha = 0.5)
 p</code></pre>
 <p><img src="/post/2020-06-05-how-to-build-a-tufte-style-weather-graph-in-r-using-ggplot2.en_files/figure-html/unnamed-chunk-3-1.png" width="768" /></p>
 <p>Add a line for the climatological normal value.</p>
 <pre class="r"><code>p &lt;- p +
   geom_line(aes(x = dayofleapyear,
-                y = precip),
+                y = normal_precip),
             color = &quot;gray40&quot;,
             size = 1.5)
 p</code></pre>
@@ -189,6 +76,35 @@ p</code></pre>
             size = 1.5)
 p</code></pre>
 <p><img src="/post/2020-06-05-how-to-build-a-tufte-style-weather-graph-in-r-using-ggplot2.en_files/figure-html/unnamed-chunk-5-1.png" width="768" /></p>
+<p>Because this graph has so many custom pieces, it needs a custom legend. I’ll use the empty space in the upper left-hand corner of the graph.</p>
+<pre class="r"><code>legend.data &lt;- all.precip.data %&gt;%
+  filter(month == 3) %&gt;%
+  # move the data further back on the x-axis
+  mutate(dayofleapyear = dayofleapyear - 15) %&gt;%
+  # move the data up on the y-axis
+  mutate(normal_precip = normal_precip + 30,
+         max_cum_precip = max_cum_precip + 30,
+         low_cum_precip = low_cum_precip + 30,
+         cum_precip_2020 = cum_precip_2020 + 30)
+
+p &lt;- p +
+  geom_ribbon(data = legend.data, aes(x = dayofleapyear,
+                                      ymin = low_cum_precip,
+                                      ymax = max_cum_precip),
+              alpha = 0.25) +
+  geom_ribbon(data = legend.data, aes(x = dayofleapyear,
+                                      ymin = (normal_precip - ytd_precip_sd),
+                                      ymax = (normal_precip + ytd_precip_sd)),
+              alpha = 0.5) +
+  geom_line(data = legend.data, aes(x = dayofleapyear,
+                                    y = normal_precip),
+            color = &quot;gray40&quot;,
+            size = 1.5) +
+  geom_line(data = legend.data, aes(x = dayofleapyear,
+                                    y = cum_precip_2020),
+            size = 1)
+p</code></pre>
+<p><img src="/post/2020-06-05-how-to-build-a-tufte-style-weather-graph-in-r-using-ggplot2.en_files/figure-html/unnamed-chunk-6-1.png" width="768" /></p>
 <p>Add the gridlines. By inserting custom gridlines on top of the data and the same color as the background, I make the grid only appear on top of the data as negative space.</p>
 <pre class="r"><code>p &lt;- p +
   geom_vline(xintercept = leapyear.month.breaks,
@@ -198,7 +114,51 @@ p</code></pre>
              color = &quot;aliceblue&quot;,
              size = 0.1)
 p</code></pre>
-<p><img src="/post/2020-06-05-how-to-build-a-tufte-style-weather-graph-in-r-using-ggplot2.en_files/figure-html/unnamed-chunk-6-1.png" width="768" /></p>
+<p><img src="/post/2020-06-05-how-to-build-a-tufte-style-weather-graph-in-r-using-ggplot2.en_files/figure-html/unnamed-chunk-7-1.png" width="768" /></p>
+<p>Add the legend annotations on top of the gridlines. There are some on-the-fly ways to automate labeling data points (e.g. the <code>ggrepel</code> package), but for a polished graph there isn’t a subsitute for doing it by hand.</p>
+<pre class="r"><code>p &lt;- p +
+  annotate(&quot;segment&quot;, x = 77, xend = 82,
+           y = legend.data$max_cum_precip[legend.data$dayofleapyear == 76],
+           yend = 42, color = &quot;gray&quot;, alpha = 0.75) +
+  annotate(&quot;text&quot;, x = 83, y = 42, family = &quot;serif&quot;,
+           label = &quot;record high&quot;, hjust = 0, vjust = 0.25) +
+  annotate(&quot;segment&quot;, x = 77, xend = 82,
+           y = legend.data$cum_precip_2020[legend.data$dayofleapyear == 76],
+           yend = 38, color = &quot;black&quot;) +
+  annotate(&quot;text&quot;, x = 83, y = 38, family = &quot;serif&quot;,
+           label = &quot;2020 precip&quot;, hjust = 0, vjust = 0.25) +
+  annotate(&quot;segment&quot;, x = 77, xend = 82,
+           y = legend.data$normal_precip[legend.data$dayofleapyear == 76],
+           yend = 35, color = &quot;gray50&quot;) +
+  annotate(&quot;text&quot;, x = 83, y = 35, family = &quot;serif&quot;,
+           label = &quot;normal precip&quot;, hjust = 0, vjust = 0.25) +
+  annotate(&quot;segment&quot;, x = 77, xend = 82,
+           y = legend.data$low_cum_precip[legend.data$dayofleapyear == 76],
+           yend = 31, color = &quot;gray&quot;, alpha = 0.75) +
+  annotate(&quot;text&quot;, x = 83, y = 31, family = &quot;serif&quot;,
+           label = &quot;record low&quot;, hjust = 0, vjust = 0.25) +
+  annotate(&quot;segment&quot;, x = 45, xend = 40,
+           y = legend.data$normal_precip[legend.data$dayofleapyear == 46] -
+             legend.data$ytd_precip_sd[legend.data$dayofleapyear == 46],
+           yend = (legend.data$normal_precip[legend.data$dayofleapyear == 46] -
+                     legend.data$ytd_precip_sd[legend.data$dayofleapyear == 46]) - 1,
+           color = &quot;gray75&quot;) +
+  annotate(&quot;text&quot;, x = 39, 
+           y = (legend.data$normal_precip[legend.data$dayofleapyear == 46] -
+                  legend.data$ytd_precip_sd[legend.data$dayofleapyear == 46]) - 1,
+           label = &quot;25th pctl.&quot;, family = &quot;serif&quot;, hjust = 1) +
+  annotate(&quot;segment&quot;, x = 45, xend = 40,
+           y = legend.data$normal_precip[legend.data$dayofleapyear == 46] +
+             legend.data$ytd_precip_sd[legend.data$dayofleapyear == 46],
+           yend = (legend.data$normal_precip[legend.data$dayofleapyear == 46] +
+                     legend.data$ytd_precip_sd[legend.data$dayofleapyear == 46]) + 1,
+           color = &quot;gray75&quot;) +
+  annotate(&quot;text&quot;, x = 39, 
+           y = (legend.data$normal_precip[legend.data$dayofleapyear == 46] +
+                  legend.data$ytd_precip_sd[legend.data$dayofleapyear == 46]) + 1,
+           label = &quot;75th pctl&quot;, family = &quot;serif&quot;, hjust = 1)
+p</code></pre>
+<p><img src="/post/2020-06-05-how-to-build-a-tufte-style-weather-graph-in-r-using-ggplot2.en_files/figure-html/unnamed-chunk-8-1.png" width="768" /></p>
 <p>Edit the axis text.</p>
 <pre class="r"><code>p &lt;- p +
   scale_x_continuous(breaks = leapyear.month.mids,
@@ -210,21 +170,18 @@ p</code></pre>
                      sec.axis = dup_axis(name = NULL),
                      expand = expansion(0.01))
 p</code></pre>
-<p><img src="/post/2020-06-05-how-to-build-a-tufte-style-weather-graph-in-r-using-ggplot2.en_files/figure-html/unnamed-chunk-7-1.png" width="768" /></p>
+<p><img src="/post/2020-06-05-how-to-build-a-tufte-style-weather-graph-in-r-using-ggplot2.en_files/figure-html/unnamed-chunk-9-1.png" width="768" /></p>
 <p>Add the explanatory text. I find it’s often easier to assign long labels to object outside the <code>ggplot</code> object, then include it in the graph’s code using <code>stringr::str_wrap</code>.</p>
-<pre class="r"><code>caption.text &lt;- paste0(&quot;All data is from the General Mitchell International Airport weather station. &quot;, 
-                       &quot;It was last updated on &quot;, last.date.updated, &quot;. &quot;,
-                       &quot;Climatological normals and standard deviation were calculated by NOAA for the period 1981-2010. &quot;,
-                       &quot;Record values are calculated using each daily report from 1941 through 2019.&quot;)
-rain.subtitle.text &lt;- paste0(&quot;2020 cumulative rainfall (black line) compared to climatological normal (gray line), &quot;,
-                        &quot;standard deviation (dark gray ribbon), and record (light gray ribbon) amounts. &quot;,
-                        &quot;Data is current through &quot;, last.date, &quot;.&quot;)
+<pre class="r"><code>last.date.updated &lt;- &quot;2020-06-19&quot;
+caption.text &lt;- paste(&quot;All data is from the General Mitchell International Airport weather station. &quot;, 
+                      &quot;It was last updated on 2020-06-19.&quot;,
+                      &quot;Climatological normals and standard deviation were calculated by NOAA for the period 1981-2010. &quot;,
+                      &quot;Record values are calculated using each daily report from 1941 through 2019.&quot;)
 p &lt;- p +
-  labs(title = &quot;Year-to-date precipitation in Milwaukee&quot;,
-       subtitle = str_wrap(rain.subtitle.text, 120),
+  labs(title = &quot;Year-to-date precipitation in Milwaukee, WI&quot;,
        caption = str_wrap(caption.text, 145))
 p</code></pre>
-<p><img src="/post/2020-06-05-how-to-build-a-tufte-style-weather-graph-in-r-using-ggplot2.en_files/figure-html/unnamed-chunk-8-1.png" width="768" /></p>
+<p><img src="/post/2020-06-05-how-to-build-a-tufte-style-weather-graph-in-r-using-ggplot2.en_files/figure-html/unnamed-chunk-10-1.png" width="768" /></p>
 <p>Add a text label for the most recent data point. The package <code>ggrepel</code> helpfully adds some padding to the point. It’s not necessary in this case since I’m only labelling a single point, but it is extremely helpful when you have multiple points and don’t want to specify the label position for each one.</p>
 <p>The bit of code <code>data = function(x){...}</code> subsets the <code>data.frame</code> from way back in the original <code>ggplot</code> line for the last day of available 2020 data.</p>
 <pre class="r"><code>p &lt;- p +
@@ -239,15 +196,17 @@ p</code></pre>
   family = &quot;serif&quot;,
   alpha = 0.75,
   point.padding = 1,
-  nudge_y = 1)
+  nudge_y = 1,
+  label.size = 0)
 p</code></pre>
-<p><img src="/post/2020-06-05-how-to-build-a-tufte-style-weather-graph-in-r-using-ggplot2.en_files/figure-html/unnamed-chunk-9-1.png" width="768" /></p>
-<p>Finally, tweak the appearance of the axes and change the alignment of the plot’s title and subtitle.</p>
+<p><img src="/post/2020-06-05-how-to-build-a-tufte-style-weather-graph-in-r-using-ggplot2.en_files/figure-html/unnamed-chunk-11-1.png" width="768" /></p>
+<p>Finally, tweak the appearance of the axes and change the alignment and size of the plot’s title.</p>
 <pre class="r"><code>p &lt;- p +
   theme(axis.ticks.x = element_blank(),
         plot.title.position = &quot;plot&quot;,
         axis.ticks.y = element_line(color = &quot;gray&quot;,
-                                    size = 0.5))
+                                    size = 0.5),
+        plot.title = element_text(size = 18))
 p</code></pre>
-<p><img src="/post/2020-06-05-how-to-build-a-tufte-style-weather-graph-in-r-using-ggplot2.en_files/figure-html/unnamed-chunk-10-1.png" width="768" /></p>
+<p><img src="/post/2020-06-05-how-to-build-a-tufte-style-weather-graph-in-r-using-ggplot2.en_files/figure-html/unnamed-chunk-12-1.png" width="768" /></p>
 </div>
