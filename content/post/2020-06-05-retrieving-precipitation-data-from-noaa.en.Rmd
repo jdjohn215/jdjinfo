@@ -1,0 +1,111 @@
+---
+title: Retrieving precipitation data from NOAA
+author: John D. Johnson
+date: '2020-06-05'
+slug: retrieving-precipitation-data-from-noaa
+categories:
+  - United States
+tags: []
+Description: ''
+Tags: []
+Categories: []
+DisableComments: no
+---
+
+This post details how to retrieve the daily precipitation data needed to create the graph [demonstrated here](https://johndjohnson.info/post/how-to-build-a-tufte-style-weather-graph-in-r-using-ggplot2/).
+
+## Getting the data
+This graph requires 3 datasets, all of them from a specific NOAA weather station.
+
+* current year (2020) daily precipitation counts
+* climatological normal year-to-date precipitation
+* daily record high and low year-to-date precipitation
+
+First, choose a weather station which has been around long enough for NOAA to calculate climatological normals. [Download the full list as a .txt file](ftp://ftp.ncdc.noaa.gov/pub/data/normals/1981-2010/station-inventories/allstations.txt). The first and last columns contain unique station IDs.
+
+I'm using the NOAA station at Milwaukee's primary airport, General Mitchell Intl (MKE). The station code is `USW00014839` and the district code is `726400`. 
+
+### current year weather reports
+
+All of the 2020 daily weather reports are available as individual files for each station in the directory `ftp://ftp.ncdc.noaa.gov/pub/data/gsod/2020/`. The URL for the MKE station is `ftp://ftp.ncdc.noaa.gov/pub/data/gsod/2020/726400-14839-2020.op.gz`. 
+
+This code downloads the data:
+
+```{r get2020, message=FALSE}
+library(tidyverse)
+
+general.mitchell.2020 <- read_table(file = "ftp://ftp.ncdc.noaa.gov/pub/data/gsod/2020/726400-14839-2020.op.gz") %>%
+  # just select station_id, date, and precipitation
+  select(station_id = 1, year_month_day = 3, precip = PRCP) %>%
+  separate(year_month_day, sep = c(4,6), into = c("year","month","day")) %>%
+  mutate(
+    # this removes the data quality flag
+    precip = str_remove(precip, "G|I|H"),
+    # values of 99.99 indicate missing value, replace with 0
+    precip = as.numeric(replace(precip, precip == 99.99, 0)),
+    # create cumulative precipitation
+    cum_precip_2020 = cumsum(precip),
+    # convert column classes
+    year = as.numeric(year),
+    month = as.numeric(month),
+    day = as.numeric(day),
+    station_id = as.character(station_id),
+    # create date variable
+    date = as.Date(paste(year, month, day, sep = "-"))) %>%
+  # just keep the variables we want
+  select(month, day, cum_precip_2020)
+head(general.mitchell.2020)
+```
+
+### climatological normals
+
+This code downloads the year-to-date precipitation normals for each weather station. After downloading, we filter for just the Milwaukee station.
+
+```{r getNormals, message=FALSE}
+precip.normals <- read_table("ftp://ftp.ncdc.noaa.gov/pub/data/normals/1981-2010/products/precipitation/ytd-prcp-normal.txt",
+                             col_names = c("station_id", "month", paste(1:31))) %>%
+  # pivot so that there is one row for each date
+  pivot_longer(names_to = "day", values_to = "precip",
+               cols = -c(station_id, month)) %>%
+  # extract the quality flag from end of precip (details in documentation)
+  mutate(quality_flag = str_sub(precip, -1),
+         # replace flag with NA when there is no letter flag
+         quality_flag = replace(quality_flag, ! quality_flag %in% c("C","P","Q","R","S"), NA),
+         # remove flags from precipitation
+         precip = str_remove(precip, "C|P|Q|R|S"),
+         # convert classes
+         day = as.numeric(day),
+         month = as.numeric(month),
+         precip = as.numeric(precip)) %>%
+  # remove dates that don't exists
+  filter(precip != -8888) %>%
+  # convert precipitation to inches
+  mutate(precip = precip/100,
+         precip = replace(precip, precip < 0, NA),
+         # replace cumprecip is missing with the previous day's value
+         precip = zoo::na.locf(precip)) %>%
+  # filter for the desired station
+  filter(station_id == "USW00014839") %>%
+  select(-quality_flag)
+head(precip.normals)
+```
+
+### records
+
+As far as I know, NOAA doesn't provide a dataset with station records, so I had to calculate this myself. You could download each annual file from NOAA's FTP server by changing the year in the file path above, or you could use NOAA's [data download user interface](https://www.ncdc.noaa.gov/cdo-web/datatools/lcd). Once you've acquired the data, calculate the cumulative year-to-date precipitation for each day, then group by day of year. Calculate the standard deviation using just the years 1981-2010, because this is the 30-year period used to calculate the climatological normals retrieved above. Your output should look something like this. You can also download this file using the provided dropbox link.
+
+```{r getRecords, message=FALSE}
+precip.records <- read_rds(url("https://www.dropbox.com/s/62w9jtx5inae3l8/MKE_precip_records.rds?dl=1"))
+head(precip.records)
+```
+
+### combine the data
+
+Join the three `data.frames` by month and day, then create a day-of-year variable.
+
+```{r joinData, message=FALSE}
+all.precip.data <- inner_join(precip.normals, precip.records) %>%
+  left_join(general.mitchell.2020) %>%
+  mutate(dayofleapyear = 1:length(station_id))
+head(all.precip.data)
+```

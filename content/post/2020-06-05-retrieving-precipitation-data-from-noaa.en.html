@@ -1,0 +1,139 @@
+---
+title: Retrieving precipitation data from NOAA
+author: John D. Johnson
+date: '2020-06-05'
+slug: retrieving-precipitation-data-from-noaa
+categories:
+  - United States
+tags: []
+Description: ''
+Tags: []
+Categories: []
+DisableComments: no
+---
+
+
+
+<p>This post details how to retrieve the daily precipitation data needed to create the graph <a href="https://johndjohnson.info/post/how-to-build-a-tufte-style-weather-graph-in-r-using-ggplot2/">demonstrated here</a>.</p>
+<div id="getting-the-data" class="section level2">
+<h2>Getting the data</h2>
+<p>This graph requires 3 datasets, all of them from a specific NOAA weather station.</p>
+<ul>
+<li>current year (2020) daily precipitation counts</li>
+<li>climatological normal year-to-date precipitation</li>
+<li>daily record high and low year-to-date precipitation</li>
+</ul>
+<p>First, choose a weather station which has been around long enough for NOAA to calculate climatological normals. <a href="ftp://ftp.ncdc.noaa.gov/pub/data/normals/1981-2010/station-inventories/allstations.txt">Download the full list as a .txt file</a>. The first and last columns contain unique station IDs.</p>
+<p>I’m using the NOAA station at Milwaukee’s primary airport, General Mitchell Intl (MKE). The station code is <code>USW00014839</code> and the district code is <code>726400</code>.</p>
+<div id="current-year-weather-reports" class="section level3">
+<h3>current year weather reports</h3>
+<p>All of the 2020 daily weather reports are available as individual files for each station in the directory <code>ftp://ftp.ncdc.noaa.gov/pub/data/gsod/2020/</code>. The URL for the MKE station is <code>ftp://ftp.ncdc.noaa.gov/pub/data/gsod/2020/726400-14839-2020.op.gz</code>.</p>
+<p>This code downloads the data:</p>
+<pre class="r"><code>library(tidyverse)
+
+general.mitchell.2020 &lt;- read_table(file = &quot;ftp://ftp.ncdc.noaa.gov/pub/data/gsod/2020/726400-14839-2020.op.gz&quot;) %&gt;%
+  # just select station_id, date, and precipitation
+  select(station_id = 1, year_month_day = 3, precip = PRCP) %&gt;%
+  separate(year_month_day, sep = c(4,6), into = c(&quot;year&quot;,&quot;month&quot;,&quot;day&quot;)) %&gt;%
+  mutate(
+    # this removes the data quality flag
+    precip = str_remove(precip, &quot;G|I|H&quot;),
+    # values of 99.99 indicate missing value, replace with 0
+    precip = as.numeric(replace(precip, precip == 99.99, 0)),
+    # create cumulative precipitation
+    cum_precip_2020 = cumsum(precip),
+    # convert column classes
+    year = as.numeric(year),
+    month = as.numeric(month),
+    day = as.numeric(day),
+    station_id = as.character(station_id),
+    # create date variable
+    date = as.Date(paste(year, month, day, sep = &quot;-&quot;))) %&gt;%
+  # just keep the variables we want
+  select(month, day, cum_precip_2020)</code></pre>
+<pre><code>## Warning: Missing column names filled in: &#39;X5&#39; [5], &#39;X7&#39; [7], &#39;X9&#39; [9],
+## &#39;X11&#39; [11], &#39;X13&#39; [13], &#39;X15&#39; [15]</code></pre>
+<pre class="r"><code>head(general.mitchell.2020)</code></pre>
+<pre><code>## # A tibble: 6 x 3
+##   month   day cum_precip_2020
+##   &lt;dbl&gt; &lt;dbl&gt;           &lt;dbl&gt;
+## 1     1     1            0.06
+## 2     1     2            0.06
+## 3     1     3            0.06
+## 4     1     4            0.06
+## 5     1     5            0.06
+## 6     1     6            0.06</code></pre>
+</div>
+<div id="climatological-normals" class="section level3">
+<h3>climatological normals</h3>
+<p>This code downloads the year-to-date precipitation normals for each weather station. After downloading, we filter for just the Milwaukee station.</p>
+<pre class="r"><code>precip.normals &lt;- read_table(&quot;ftp://ftp.ncdc.noaa.gov/pub/data/normals/1981-2010/products/precipitation/ytd-prcp-normal.txt&quot;,
+                             col_names = c(&quot;station_id&quot;, &quot;month&quot;, paste(1:31))) %&gt;%
+  # pivot so that there is one row for each date
+  pivot_longer(names_to = &quot;day&quot;, values_to = &quot;precip&quot;,
+               cols = -c(station_id, month)) %&gt;%
+  # extract the quality flag from end of precip (details in documentation)
+  mutate(quality_flag = str_sub(precip, -1),
+         # replace flag with NA when there is no letter flag
+         quality_flag = replace(quality_flag, ! quality_flag %in% c(&quot;C&quot;,&quot;P&quot;,&quot;Q&quot;,&quot;R&quot;,&quot;S&quot;), NA),
+         # remove flags from precipitation
+         precip = str_remove(precip, &quot;C|P|Q|R|S&quot;),
+         # convert classes
+         day = as.numeric(day),
+         month = as.numeric(month),
+         precip = as.numeric(precip)) %&gt;%
+  # remove dates that don&#39;t exists
+  filter(precip != -8888) %&gt;%
+  # convert precipitation to inches
+  mutate(precip = precip/100,
+         precip = replace(precip, precip &lt; 0, NA),
+         # replace cumprecip is missing with the previous day&#39;s value
+         precip = zoo::na.locf(precip)) %&gt;%
+  # filter for the desired station
+  filter(station_id == &quot;USW00014839&quot;) %&gt;%
+  select(-quality_flag)
+head(precip.normals)</code></pre>
+<pre><code>## # A tibble: 6 x 4
+##   station_id  month   day precip
+##   &lt;chr&gt;       &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt;
+## 1 USW00014839     1     1   0.06
+## 2 USW00014839     1     2   0.12
+## 3 USW00014839     1     3   0.18
+## 4 USW00014839     1     4   0.24
+## 5 USW00014839     1     5   0.3 
+## 6 USW00014839     1     6   0.36</code></pre>
+</div>
+<div id="records" class="section level3">
+<h3>records</h3>
+<p>As far as I know, NOAA doesn’t provide a dataset with station records, so I had to calculate this myself. You could download each annual file from NOAA’s FTP server by changing the year in the file path above, or you could use NOAA’s <a href="https://www.ncdc.noaa.gov/cdo-web/datatools/lcd">data download user interface</a>. Once you’ve acquired the data, calculate the cumulative year-to-date precipitation for each day, then group by day of year. Calculate the standard deviation using just the years 1981-2010, because this is the 30-year period used to calculate the climatological normals retrieved above. Your output should look something like this. You can also download this file using the provided dropbox link.</p>
+<pre class="r"><code>precip.records &lt;- read_rds(url(&quot;https://www.dropbox.com/s/62w9jtx5inae3l8/MKE_precip_records.rds?dl=1&quot;))
+head(precip.records)</code></pre>
+<pre><code>## # A tibble: 6 x 5
+##   month   day ytd_precip_sd max_cum_precip low_cum_precip
+##   &lt;dbl&gt; &lt;dbl&gt;         &lt;dbl&gt;          &lt;dbl&gt;          &lt;dbl&gt;
+## 1     1     1         0.202           1.11              0
+## 2     1     2         0.333           1.25              0
+## 3     1     3         0.346           1.26              0
+## 4     1     4         0.427           1.41              0
+## 5     1     5         0.436           1.41              0
+## 6     1     6         0.470           1.58              0</code></pre>
+</div>
+<div id="combine-the-data" class="section level3">
+<h3>combine the data</h3>
+<p>Join the three <code>data.frames</code> by month and day, then create a day-of-year variable.</p>
+<pre class="r"><code>all.precip.data &lt;- inner_join(precip.normals, precip.records) %&gt;%
+  left_join(general.mitchell.2020) %&gt;%
+  mutate(dayofleapyear = 1:length(station_id))
+head(all.precip.data)</code></pre>
+<pre><code>## # A tibble: 6 x 9
+##   station_id month   day precip ytd_precip_sd max_cum_precip low_cum_precip
+##   &lt;chr&gt;      &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt;         &lt;dbl&gt;          &lt;dbl&gt;          &lt;dbl&gt;
+## 1 USW000148…     1     1   0.06         0.202           1.11              0
+## 2 USW000148…     1     2   0.12         0.333           1.25              0
+## 3 USW000148…     1     3   0.18         0.346           1.26              0
+## 4 USW000148…     1     4   0.24         0.427           1.41              0
+## 5 USW000148…     1     5   0.3          0.436           1.41              0
+## 6 USW000148…     1     6   0.36         0.470           1.58              0
+## # … with 2 more variables: cum_precip_2020 &lt;dbl&gt;, dayofleapyear &lt;int&gt;</code></pre>
+</div>
+</div>
