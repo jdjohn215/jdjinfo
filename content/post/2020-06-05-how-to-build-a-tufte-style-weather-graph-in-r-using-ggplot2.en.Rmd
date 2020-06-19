@@ -34,7 +34,7 @@ last.date <- max(as.Date(paste("2020", all.precip.data$month, all.precip.data$da
 
 caption.text <- paste("All data is from the General Mitchell International Airport weather station. ", 
                       "It was last updated on 2020-06-19.",
-                      "Climatological normals and standard deviation were calculated by NOAA for the period 1981-2010. ",
+                      "Climatological normals and standard deviation were calculated for the period 1981-2010. ",
                       "Record values are calculated using each daily report from 1941 through 2019.")
 
 leapyear.month.breaks <- all.precip.data %>% 
