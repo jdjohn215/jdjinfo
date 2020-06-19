@@ -357,7 +357,7 @@ Add the explanatory text. I find it's often easier to assign long labels to obje
 last.date.updated <- "2020-06-19"
 caption.text <- paste("All data is from the General Mitchell International Airport weather station. ", 
                       "It was last updated on 2020-06-19.",
-                      "Climatological normals and standard deviation were calculated by NOAA for the period 1981-2010. ",
+                      "Climatological normals and standard deviation were calculated for the period 1981-2010. ",
                       "Record values are calculated using each daily report from 1941 through 2019.")
 p <- p +
   labs(title = "Year-to-date precipitation in Milwaukee, WI",
