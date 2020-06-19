@@ -1,4 +1,4 @@
-station_id,month,day,precip,ytd_precip_sd,max_cum_precip,low_cum_precip,cum_precip_2020,dayofleapyear
+station_id,month,day,normal_precip,ytd_precip_sd,max_cum_precip,low_cum_precip,cum_precip_2020,dayofleapyear
 USW00014839,1,1,0.06,0.20169283576765934,1.11,0,0.06,1
 USW00014839,1,2,0.12,0.3327698110202258,1.25,0,0.06,2
 USW00014839,1,3,0.18,0.345896968248752,1.26,0,0.06,3
