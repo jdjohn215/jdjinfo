@@ -1,0 +1,867 @@
+---
+title: The occupations of Wisconsin workers, 1960-2016
+author: John D. Johnson
+date: '2020-07-21'
+slug: wisconsin-occupations-1960-2016
+categories:
+  - Wisconsin
+tags: []
+Description: ''
+Tags: []
+Categories: []
+DisableComments: no
+---
+
+
+
+<p>While working on an unrelated project, I downloaded over 19 million U.S. Census interviews of Wisconsin residents conducted since 1960. This table shows the estimated number of workers in each kind of work, along with their median wage. I leave in all workers in each occupation, even if they are part time, temporary, or even experiencing temporary unemployment. Don’t think of these statistics as representing the annual wage of a full time worker in this profession. Instead, this shows the previous year’s income for the median member of this occupation.</p>
+<p>The occupational groups presented here are taken from a harmonized variable created by IPUMS USA, where I also retrieved this data. You can read <a href="https://usa.ipums.org/usa-action/variables/OCC2010#description_section">more about it here</a>.</p>
+<style>html {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
+}
+
+#sohuirpkwe .gt_table {
+  display: table;
+  border-collapse: collapse;
+  margin-left: auto;
+  margin-right: auto;
+  color: #333333;
+  font-size: 16px;
+  background-color: #FFFFFF;
+  width: auto;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #A8A8A8;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #A8A8A8;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+}
+
+#sohuirpkwe .gt_heading {
+  background-color: #FFFFFF;
+  text-align: center;
+  border-bottom-color: #FFFFFF;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#sohuirpkwe .gt_title {
+  color: #333333;
+  font-size: 125%;
+  font-weight: initial;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  border-bottom-color: #FFFFFF;
+  border-bottom-width: 0;
+}
+
+#sohuirpkwe .gt_subtitle {
+  color: #333333;
+  font-size: 85%;
+  font-weight: initial;
+  padding-top: 0;
+  padding-bottom: 4px;
+  border-top-color: #FFFFFF;
+  border-top-width: 0;
+}
+
+#sohuirpkwe .gt_bottom_border {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#sohuirpkwe .gt_col_headings {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#sohuirpkwe .gt_col_heading {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 6px;
+  padding-left: 5px;
+  padding-right: 5px;
+  overflow-x: hidden;
+}
+
+#sohuirpkwe .gt_column_spanner_outer {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+#sohuirpkwe .gt_column_spanner_outer:first-child {
+  padding-left: 0;
+}
+
+#sohuirpkwe .gt_column_spanner_outer:last-child {
+  padding-right: 0;
+}
+
+#sohuirpkwe .gt_column_spanner {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 6px;
+  overflow-x: hidden;
+  display: inline-block;
+  width: 100%;
+}
+
+#sohuirpkwe .gt_group_heading {
+  padding: 8px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#sohuirpkwe .gt_empty_group_heading {
+  padding: 0.5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#sohuirpkwe .gt_from_md > :first-child {
+  margin-top: 0;
+}
+
+#sohuirpkwe .gt_from_md > :last-child {
+  margin-bottom: 0;
+}
+
+#sohuirpkwe .gt_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  margin: 10px;
+  border-top-style: solid;
+  border-top-width: 1px;
+  border-top-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  overflow-x: hidden;
+}
+
+#sohuirpkwe .gt_stub {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 12px;
+}
+
+#sohuirpkwe .gt_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#sohuirpkwe .gt_first_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+}
+
+#sohuirpkwe .gt_grand_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#sohuirpkwe .gt_first_grand_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: double;
+  border-top-width: 6px;
+  border-top-color: #D3D3D3;
+}
+
+#sohuirpkwe .gt_striped {
+  background-color: rgba(128, 128, 128, 0.05);
+}
+
+#sohuirpkwe .gt_table_body {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#sohuirpkwe .gt_footnotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#sohuirpkwe .gt_footnote {
+  margin: 0px;
+  font-size: 90%;
+  padding: 4px;
+}
+
+#sohuirpkwe .gt_sourcenotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#sohuirpkwe .gt_sourcenote {
+  font-size: 90%;
+  padding: 4px;
+}
+
+#sohuirpkwe .gt_left {
+  text-align: left;
+}
+
+#sohuirpkwe .gt_center {
+  text-align: center;
+}
+
+#sohuirpkwe .gt_right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#sohuirpkwe .gt_font_normal {
+  font-weight: normal;
+}
+
+#sohuirpkwe .gt_font_bold {
+  font-weight: bold;
+}
+
+#sohuirpkwe .gt_font_italic {
+  font-style: italic;
+}
+
+#sohuirpkwe .gt_super {
+  font-size: 65%;
+}
+
+#sohuirpkwe .gt_footnote_marks {
+  font-style: italic;
+  font-size: 65%;
+}
+</style>
+<div id="sohuirpkwe" style="overflow-x:auto;overflow-y:auto;width:auto;height:auto;"><table class="gt_table">
+  <thead class="gt_header">
+    <tr>
+      <th colspan="15" class="gt_heading gt_title gt_font_normal" style>Working Wisconsin residents by occupation and median annual wage, 1960-2016</th>
+    </tr>
+    <tr>
+      <th colspan="15" class="gt_heading gt_subtitle gt_font_normal gt_bottom_border" style>Statistics include part-time and temporary workers</th>
+    </tr>
+  </thead>
+  <thead class="gt_col_headings">
+    <tr>
+      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="2" colspan="1"></th>
+      <th class="gt_center gt_columns_top_border gt_column_spanner_outer" rowspan="1" colspan="2">
+        <span class="gt_column_spanner">1960</span>
+      </th>
+      <th class="gt_center gt_columns_top_border gt_column_spanner_outer" rowspan="1" colspan="2">
+        <span class="gt_column_spanner">1970</span>
+      </th>
+      <th class="gt_center gt_columns_top_border gt_column_spanner_outer" rowspan="1" colspan="2">
+        <span class="gt_column_spanner">1980</span>
+      </th>
+      <th class="gt_center gt_columns_top_border gt_column_spanner_outer" rowspan="1" colspan="2">
+        <span class="gt_column_spanner">1990</span>
+      </th>
+      <th class="gt_center gt_columns_top_border gt_column_spanner_outer" rowspan="1" colspan="2">
+        <span class="gt_column_spanner">2000</span>
+      </th>
+      <th class="gt_center gt_columns_top_border gt_column_spanner_outer" rowspan="1" colspan="2">
+        <span class="gt_column_spanner">2010<sup class="gt_footnote_marks">1</sup></span>
+      </th>
+      <th class="gt_center gt_columns_top_border gt_column_spanner_outer" rowspan="1" colspan="2">
+        <span class="gt_column_spanner">2016<sup class="gt_footnote_marks">1</sup></span>
+      </th>
+    </tr>
+    <tr>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1">workers</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1">wages</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1">workers</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1">wages</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1">workers</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1">wages</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1">workers</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1">wages</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1">workers</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1">wages</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1">workers</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1">wages</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1">workers</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1">wages</th>
+    </tr>
+  </thead>
+  <tbody class="gt_table_body">
+    <tr>
+      <td class="gt_row gt_left gt_stub">Office &amp; Administrative Support</td>
+      <td class="gt_row gt_right">283,480</td>
+      <td class="gt_row gt_right">$13,099</td>
+      <td class="gt_row gt_right">363,600</td>
+      <td class="gt_row gt_right">$18,231</td>
+      <td class="gt_row gt_right">408,220</td>
+      <td class="gt_row gt_right">$21,114</td>
+      <td class="gt_row gt_right">434,106</td>
+      <td class="gt_row gt_right">$22,073</td>
+      <td class="gt_row gt_right">512,292</td>
+      <td class="gt_row gt_right">$26,918</td>
+      <td class="gt_row gt_right">496,799</td>
+      <td class="gt_row gt_right">$26,411</td>
+      <td class="gt_row gt_right">473,446</td>
+      <td class="gt_row gt_right">$25,615</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left gt_stub">Production</td>
+      <td class="gt_row gt_right">434,880</td>
+      <td class="gt_row gt_right">$30,506</td>
+      <td class="gt_row gt_right">479,400</td>
+      <td class="gt_row gt_right">$33,479</td>
+      <td class="gt_row gt_right">460,000</td>
+      <td class="gt_row gt_right">$34,397</td>
+      <td class="gt_row gt_right">420,345</td>
+      <td class="gt_row gt_right">$32,532</td>
+      <td class="gt_row gt_right">446,368</td>
+      <td class="gt_row gt_right">$35,890</td>
+      <td class="gt_row gt_right">367,365</td>
+      <td class="gt_row gt_right">$31,117</td>
+      <td class="gt_row gt_right">355,310</td>
+      <td class="gt_row gt_right">$33,090</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left gt_stub">Sales &amp; Related</td>
+      <td class="gt_row gt_right">169,180</td>
+      <td class="gt_row gt_right">$5,266</td>
+      <td class="gt_row gt_right">201,800</td>
+      <td class="gt_row gt_right">$8,950</td>
+      <td class="gt_row gt_right">246,780</td>
+      <td class="gt_row gt_right">$11,924</td>
+      <td class="gt_row gt_right">314,848</td>
+      <td class="gt_row gt_right">$14,393</td>
+      <td class="gt_row gt_right">344,810</td>
+      <td class="gt_row gt_right">$19,440</td>
+      <td class="gt_row gt_right">362,228</td>
+      <td class="gt_row gt_right">$18,160</td>
+      <td class="gt_row gt_right">343,122</td>
+      <td class="gt_row gt_right">$19,715</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left gt_stub">Management, Business, Science, &amp; Arts</td>
+      <td class="gt_row gt_right">235,320</td>
+      <td class="gt_row gt_right">&mdash;</td>
+      <td class="gt_row gt_right">223,500</td>
+      <td class="gt_row gt_right">$6,298</td>
+      <td class="gt_row gt_right">244,800</td>
+      <td class="gt_row gt_right">$24,395</td>
+      <td class="gt_row gt_right">272,247</td>
+      <td class="gt_row gt_right">$32,518</td>
+      <td class="gt_row gt_right">284,215</td>
+      <td class="gt_row gt_right">$47,853</td>
+      <td class="gt_row gt_right">302,305</td>
+      <td class="gt_row gt_right">$51,871</td>
+      <td class="gt_row gt_right">340,359</td>
+      <td class="gt_row gt_right">$53,218</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left gt_stub">Transportation &amp; Material Moving</td>
+      <td class="gt_row gt_right">169,800</td>
+      <td class="gt_row gt_right">$27,939</td>
+      <td class="gt_row gt_right">185,800</td>
+      <td class="gt_row gt_right">$24,860</td>
+      <td class="gt_row gt_right">237,460</td>
+      <td class="gt_row gt_right">$25,021</td>
+      <td class="gt_row gt_right">242,133</td>
+      <td class="gt_row gt_right">$23,649</td>
+      <td class="gt_row gt_right">241,243</td>
+      <td class="gt_row gt_right">$28,413</td>
+      <td class="gt_row gt_right">261,724</td>
+      <td class="gt_row gt_right">$21,297</td>
+      <td class="gt_row gt_right">254,324</td>
+      <td class="gt_row gt_right">$23,801</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left gt_stub">Food Preparation &amp; Serving</td>
+      <td class="gt_row gt_right">92,980</td>
+      <td class="gt_row gt_right">$2,655</td>
+      <td class="gt_row gt_right">126,300</td>
+      <td class="gt_row gt_right">$4,972</td>
+      <td class="gt_row gt_right">181,920</td>
+      <td class="gt_row gt_right">$5,548</td>
+      <td class="gt_row gt_right">179,992</td>
+      <td class="gt_row gt_right">$6,898</td>
+      <td class="gt_row gt_right">188,468</td>
+      <td class="gt_row gt_right">$7,926</td>
+      <td class="gt_row gt_right">220,005</td>
+      <td class="gt_row gt_right">$7,589</td>
+      <td class="gt_row gt_right">222,332</td>
+      <td class="gt_row gt_right">$8,217</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left gt_stub">Education, Training, &amp; Library</td>
+      <td class="gt_row gt_right">55,980</td>
+      <td class="gt_row gt_right">$26,155</td>
+      <td class="gt_row gt_right">109,800</td>
+      <td class="gt_row gt_right">$35,136</td>
+      <td class="gt_row gt_right">122,660</td>
+      <td class="gt_row gt_right">$34,147</td>
+      <td class="gt_row gt_right">146,828</td>
+      <td class="gt_row gt_right">$33,503</td>
+      <td class="gt_row gt_right">175,383</td>
+      <td class="gt_row gt_right">$40,077</td>
+      <td class="gt_row gt_right">207,788</td>
+      <td class="gt_row gt_right">$33,415</td>
+      <td class="gt_row gt_right">208,834</td>
+      <td class="gt_row gt_right">$32,135</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left gt_stub">Healthcare Practitioners &amp; Technicians</td>
+      <td class="gt_row gt_right">42,680</td>
+      <td class="gt_row gt_right">$6,571</td>
+      <td class="gt_row gt_right">55,700</td>
+      <td class="gt_row gt_right">$23,535</td>
+      <td class="gt_row gt_right">85,260</td>
+      <td class="gt_row gt_right">$29,396</td>
+      <td class="gt_row gt_right">112,156</td>
+      <td class="gt_row gt_right">$37,445</td>
+      <td class="gt_row gt_right">141,010</td>
+      <td class="gt_row gt_right">$44,863</td>
+      <td class="gt_row gt_right">177,938</td>
+      <td class="gt_row gt_right">$49,292</td>
+      <td class="gt_row gt_right">208,538</td>
+      <td class="gt_row gt_right">$50,456</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left gt_stub">Construction</td>
+      <td class="gt_row gt_right">64,780</td>
+      <td class="gt_row gt_right">$31,377</td>
+      <td class="gt_row gt_right">100,900</td>
+      <td class="gt_row gt_right">$40,108</td>
+      <td class="gt_row gt_right">135,040</td>
+      <td class="gt_row gt_right">$33,772</td>
+      <td class="gt_row gt_right">138,051</td>
+      <td class="gt_row gt_right">$31,532</td>
+      <td class="gt_row gt_right">171,668</td>
+      <td class="gt_row gt_right">$38,881</td>
+      <td class="gt_row gt_right">176,987</td>
+      <td class="gt_row gt_right">$28,091</td>
+      <td class="gt_row gt_right">159,957</td>
+      <td class="gt_row gt_right">$33,574</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left gt_stub">Building &amp; Grounds Cleaning &amp; Maintenance</td>
+      <td class="gt_row gt_right">46,280</td>
+      <td class="gt_row gt_right">$5,701</td>
+      <td class="gt_row gt_right">101,800</td>
+      <td class="gt_row gt_right">$7,624</td>
+      <td class="gt_row gt_right">112,060</td>
+      <td class="gt_row gt_right">$8,642</td>
+      <td class="gt_row gt_right">116,369</td>
+      <td class="gt_row gt_right">$9,460</td>
+      <td class="gt_row gt_right">113,251</td>
+      <td class="gt_row gt_right">$12,562</td>
+      <td class="gt_row gt_right">137,956</td>
+      <td class="gt_row gt_right">$9,097</td>
+      <td class="gt_row gt_right">139,571</td>
+      <td class="gt_row gt_right">$11,311</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left gt_stub">Personal Care &amp; Service</td>
+      <td class="gt_row gt_right">63,140</td>
+      <td class="gt_row gt_right">$1,349</td>
+      <td class="gt_row gt_right">67,300</td>
+      <td class="gt_row gt_right">$2,983</td>
+      <td class="gt_row gt_right">52,620</td>
+      <td class="gt_row gt_right">$3,766</td>
+      <td class="gt_row gt_right">57,073</td>
+      <td class="gt_row gt_right">$3,252</td>
+      <td class="gt_row gt_right">85,299</td>
+      <td class="gt_row gt_right">$5,982</td>
+      <td class="gt_row gt_right">118,065</td>
+      <td class="gt_row gt_right">$6,072</td>
+      <td class="gt_row gt_right">132,810</td>
+      <td class="gt_row gt_right">$8,028</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left gt_stub">Installation, Maintenance, &amp; Repair</td>
+      <td class="gt_row gt_right">67,780</td>
+      <td class="gt_row gt_right">$38,949</td>
+      <td class="gt_row gt_right">80,300</td>
+      <td class="gt_row gt_right">$46,738</td>
+      <td class="gt_row gt_right">92,220</td>
+      <td class="gt_row gt_right">$42,180</td>
+      <td class="gt_row gt_right">97,215</td>
+      <td class="gt_row gt_right">$39,416</td>
+      <td class="gt_row gt_right">124,674</td>
+      <td class="gt_row gt_right">$44,863</td>
+      <td class="gt_row gt_right">110,358</td>
+      <td class="gt_row gt_right">$39,553</td>
+      <td class="gt_row gt_right">111,253</td>
+      <td class="gt_row gt_right">$41,274</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left gt_stub">Healthcare Support</td>
+      <td class="gt_row gt_right">22,120</td>
+      <td class="gt_row gt_right">$8,747</td>
+      <td class="gt_row gt_right">51,700</td>
+      <td class="gt_row gt_right">$10,276</td>
+      <td class="gt_row gt_right">65,600</td>
+      <td class="gt_row gt_right">$12,518</td>
+      <td class="gt_row gt_right">70,013</td>
+      <td class="gt_row gt_right">$14,781</td>
+      <td class="gt_row gt_right">81,348</td>
+      <td class="gt_row gt_right">$20,936</td>
+      <td class="gt_row gt_right">98,761</td>
+      <td class="gt_row gt_right">$20,485</td>
+      <td class="gt_row gt_right">91,726</td>
+      <td class="gt_row gt_right">$20,407</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left gt_stub">Business Operations Specialists</td>
+      <td class="gt_row gt_right">10,800</td>
+      <td class="gt_row gt_right">$43,562</td>
+      <td class="gt_row gt_right">10,200</td>
+      <td class="gt_row gt_right">$56,350</td>
+      <td class="gt_row gt_right">25,140</td>
+      <td class="gt_row gt_right">$42,086</td>
+      <td class="gt_row gt_right">46,991</td>
+      <td class="gt_row gt_right">$36,747</td>
+      <td class="gt_row gt_right">62,477</td>
+      <td class="gt_row gt_right">$44,863</td>
+      <td class="gt_row gt_right">73,478</td>
+      <td class="gt_row gt_right">$47,660</td>
+      <td class="gt_row gt_right">90,078</td>
+      <td class="gt_row gt_right">$45,685</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left gt_stub">Computer &amp; Mathematical</td>
+      <td class="gt_row gt_right">580</td>
+      <td class="gt_row gt_right">$41,821</td>
+      <td class="gt_row gt_right">5,900</td>
+      <td class="gt_row gt_right">$59,996</td>
+      <td class="gt_row gt_right">10,920</td>
+      <td class="gt_row gt_right">$49,041</td>
+      <td class="gt_row gt_right">21,882</td>
+      <td class="gt_row gt_right">$55,182</td>
+      <td class="gt_row gt_right">57,322</td>
+      <td class="gt_row gt_right">$59,817</td>
+      <td class="gt_row gt_right">70,844</td>
+      <td class="gt_row gt_right">$63,731</td>
+      <td class="gt_row gt_right">86,720</td>
+      <td class="gt_row gt_right">$64,886</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left gt_stub">Financial Specialists</td>
+      <td class="gt_row gt_right">11,200</td>
+      <td class="gt_row gt_right">$46,173</td>
+      <td class="gt_row gt_right">15,400</td>
+      <td class="gt_row gt_right">$42,097</td>
+      <td class="gt_row gt_right">27,220</td>
+      <td class="gt_row gt_right">$39,523</td>
+      <td class="gt_row gt_right">43,571</td>
+      <td class="gt_row gt_right">$39,416</td>
+      <td class="gt_row gt_right">56,393</td>
+      <td class="gt_row gt_right">$44,863</td>
+      <td class="gt_row gt_right">68,906</td>
+      <td class="gt_row gt_right">$50,431</td>
+      <td class="gt_row gt_right">68,949</td>
+      <td class="gt_row gt_right">$50,956</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left gt_stub">Arts, Design, Entertainment, Sports, &amp; Media</td>
+      <td class="gt_row gt_right">18,440</td>
+      <td class="gt_row gt_right">$13,099</td>
+      <td class="gt_row gt_right">21,200</td>
+      <td class="gt_row gt_right">$13,590</td>
+      <td class="gt_row gt_right">30,200</td>
+      <td class="gt_row gt_right">$15,644</td>
+      <td class="gt_row gt_right">42,724</td>
+      <td class="gt_row gt_right">$16,675</td>
+      <td class="gt_row gt_right">54,757</td>
+      <td class="gt_row gt_right">$22,431</td>
+      <td class="gt_row gt_right">56,037</td>
+      <td class="gt_row gt_right">$19,766</td>
+      <td class="gt_row gt_right">62,419</td>
+      <td class="gt_row gt_right">$19,595</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left gt_stub">Community &amp; Social Services</td>
+      <td class="gt_row gt_right">8,660</td>
+      <td class="gt_row gt_right">$26,590</td>
+      <td class="gt_row gt_right">18,000</td>
+      <td class="gt_row gt_right">$40,108</td>
+      <td class="gt_row gt_right">24,700</td>
+      <td class="gt_row gt_right">$28,146</td>
+      <td class="gt_row gt_right">31,923</td>
+      <td class="gt_row gt_right">$34,686</td>
+      <td class="gt_row gt_right">44,318</td>
+      <td class="gt_row gt_right">$39,928</td>
+      <td class="gt_row gt_right">51,217</td>
+      <td class="gt_row gt_right">$38,579</td>
+      <td class="gt_row gt_right">55,658</td>
+      <td class="gt_row gt_right">$39,442</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left gt_stub">Protective Service</td>
+      <td class="gt_row gt_right">14,340</td>
+      <td class="gt_row gt_right">$41,821</td>
+      <td class="gt_row gt_right">20,400</td>
+      <td class="gt_row gt_right">$48,395</td>
+      <td class="gt_row gt_right">31,520</td>
+      <td class="gt_row gt_right">$35,960</td>
+      <td class="gt_row gt_right">37,518</td>
+      <td class="gt_row gt_right">$39,416</td>
+      <td class="gt_row gt_right">47,887</td>
+      <td class="gt_row gt_right">$45,012</td>
+      <td class="gt_row gt_right">60,659</td>
+      <td class="gt_row gt_right">$38,096</td>
+      <td class="gt_row gt_right">54,388</td>
+      <td class="gt_row gt_right">$41,480</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left gt_stub">Architecture &amp; Engineering</td>
+      <td class="gt_row gt_right">23,700</td>
+      <td class="gt_row gt_right">$56,617</td>
+      <td class="gt_row gt_right">30,600</td>
+      <td class="gt_row gt_right">$66,626</td>
+      <td class="gt_row gt_right">35,160</td>
+      <td class="gt_row gt_right">$56,886</td>
+      <td class="gt_row gt_right">40,369</td>
+      <td class="gt_row gt_right">$61,094</td>
+      <td class="gt_row gt_right">47,266</td>
+      <td class="gt_row gt_right">$68,789</td>
+      <td class="gt_row gt_right">46,829</td>
+      <td class="gt_row gt_right">$69,882</td>
+      <td class="gt_row gt_right">51,290</td>
+      <td class="gt_row gt_right">$70,877</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left gt_stub">Farming, Fishing, &amp; Forestry</td>
+      <td class="gt_row gt_right">84,560</td>
+      <td class="gt_row gt_right">&mdash;</td>
+      <td class="gt_row gt_right">58,400</td>
+      <td class="gt_row gt_right">$2,320</td>
+      <td class="gt_row gt_right">58,680</td>
+      <td class="gt_row gt_right">$3,766</td>
+      <td class="gt_row gt_right">43,233</td>
+      <td class="gt_row gt_right">$4,533</td>
+      <td class="gt_row gt_right">37,192</td>
+      <td class="gt_row gt_right">$8,673</td>
+      <td class="gt_row gt_right">39,457</td>
+      <td class="gt_row gt_right">$13,157</td>
+      <td class="gt_row gt_right">40,859</td>
+      <td class="gt_row gt_right">$12,367</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left gt_stub">Life, Physical, &amp; Social Science</td>
+      <td class="gt_row gt_right">19,040</td>
+      <td class="gt_row gt_right">$38,340</td>
+      <td class="gt_row gt_right">28,600</td>
+      <td class="gt_row gt_right">$31,490</td>
+      <td class="gt_row gt_right">24,980</td>
+      <td class="gt_row gt_right">$37,523</td>
+      <td class="gt_row gt_right">37,878</td>
+      <td class="gt_row gt_right">$43,357</td>
+      <td class="gt_row gt_right">28,299</td>
+      <td class="gt_row gt_right">$48,152</td>
+      <td class="gt_row gt_right">28,777</td>
+      <td class="gt_row gt_right">$46,014</td>
+      <td class="gt_row gt_right">31,500</td>
+      <td class="gt_row gt_right">$45,921</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left gt_stub">Legal</td>
+      <td class="gt_row gt_right">4,220</td>
+      <td class="gt_row gt_right">&mdash;</td>
+      <td class="gt_row gt_right">5,700</td>
+      <td class="gt_row gt_right">$22,209</td>
+      <td class="gt_row gt_right">10,260</td>
+      <td class="gt_row gt_right">$31,272</td>
+      <td class="gt_row gt_right">14,507</td>
+      <td class="gt_row gt_right">$43,085</td>
+      <td class="gt_row gt_right">19,769</td>
+      <td class="gt_row gt_right">$50,545</td>
+      <td class="gt_row gt_right">24,793</td>
+      <td class="gt_row gt_right">$50,120</td>
+      <td class="gt_row gt_right">25,036</td>
+      <td class="gt_row gt_right">$54,320</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left gt_stub">Technicians</td>
+      <td class="gt_row gt_right">1,280</td>
+      <td class="gt_row gt_right">$42,648</td>
+      <td class="gt_row gt_right">8,700</td>
+      <td class="gt_row gt_right">$48,063</td>
+      <td class="gt_row gt_right">8,540</td>
+      <td class="gt_row gt_right">$39,523</td>
+      <td class="gt_row gt_right">8,590</td>
+      <td class="gt_row gt_right">$36,440</td>
+      <td class="gt_row gt_right">12,567</td>
+      <td class="gt_row gt_right">$49,349</td>
+      <td class="gt_row gt_right">11,847</td>
+      <td class="gt_row gt_right">$45,126</td>
+      <td class="gt_row gt_right">11,638</td>
+      <td class="gt_row gt_right">$45,900</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left gt_stub">Military Specific</td>
+      <td class="gt_row gt_right">6,240</td>
+      <td class="gt_row gt_right">$20,062</td>
+      <td class="gt_row gt_right">2,400</td>
+      <td class="gt_row gt_right">$12,927</td>
+      <td class="gt_row gt_right">1,840</td>
+      <td class="gt_row gt_right">$15,644</td>
+      <td class="gt_row gt_right">1,828</td>
+      <td class="gt_row gt_right">$25,620</td>
+      <td class="gt_row gt_right">1,100</td>
+      <td class="gt_row gt_right">$41,872</td>
+      <td class="gt_row gt_right">2,706</td>
+      <td class="gt_row gt_right">$26,712</td>
+      <td class="gt_row gt_right">2,007</td>
+      <td class="gt_row gt_right">$31,709</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left gt_stub">Extraction</td>
+      <td class="gt_row gt_right">1,560</td>
+      <td class="gt_row gt_right">$30,506</td>
+      <td class="gt_row gt_right">1,800</td>
+      <td class="gt_row gt_right">$36,793</td>
+      <td class="gt_row gt_right">1,660</td>
+      <td class="gt_row gt_right">$28,146</td>
+      <td class="gt_row gt_right">1,286</td>
+      <td class="gt_row gt_right">$40,543</td>
+      <td class="gt_row gt_right">1,152</td>
+      <td class="gt_row gt_right">$46,358</td>
+      <td class="gt_row gt_right">1,533</td>
+      <td class="gt_row gt_right">$46,394</td>
+      <td class="gt_row gt_right">1,276</td>
+      <td class="gt_row gt_right">$41,957</td>
+    </tr>
+  </tbody>
+  <tfoot class="gt_sourcenotes">
+    <tr>
+      <td class="gt_sourcenote" colspan="15">Statistics are constructed using Census Bureau microdata. All data was retrieved from IPUMS USA, University of Minnesota, www.ipums.org. Median wages are presented in 2020 real dollars. They include the wages of part-time and temporary workers.</td>
+    </tr>
+  </tfoot>
+  <tfoot>
+    <tr class="gt_footnotes">
+      <td colspan="15">
+        <p class="gt_footnote">
+          <sup class="gt_footnote_marks">
+            <em>1</em>
+          </sup>
+           
+          2010 and 2016 statistics are created by pooling American Community Survey interviews from 2008-2012 and 2014-2018, respectively.
+          <br />
+        </p>
+      </td>
+    </tr>
+  </tfoot>
+</table></div>

@@ -1,0 +1,55 @@
+---
+title: The occupations of Wisconsin workers, 1960-2016
+author: John D. Johnson
+date: '2020-07-21'
+slug: wisconsin-occupations-1960-2016
+categories:
+  - Wisconsin
+tags: []
+Description: ''
+Tags: []
+Categories: []
+DisableComments: no
+---
+
+```{r setup, echo=FALSE, warning=FALSE, message=FALSE}
+library(tidyverse)
+library(gt)
+
+occupations <- readRDS("~/Dropbox/Projects/2020/July/IncomeAndWealth/tables/WisconsinOccupationStatistics1960_2016.rds")
+```
+
+While working on an unrelated project, I downloaded over 19 million U.S. Census interviews of Wisconsin residents conducted since 1960. This table shows the estimated number of workers in each kind of work, along with their median wage. I leave in all workers in each occupation, even if they are part time, temporary, or even experiencing temporary unemployment. Don't think of these statistics as representing the annual wage of a full time worker in this profession. Instead, this shows the previous year's income for the median member of this occupation.
+
+The occupational groups presented here are taken from a harmonized variable created by IPUMS USA, where I also retrieved this data. You can read [more about it here](https://usa.ipums.org/usa-action/variables/OCC2010#description_section).
+
+```{r table, echo=FALSE}
+occupations %>%
+  gt(rowname_col = "simple_occupation") %>%
+  tab_spanner_delim(delim = "_") %>%
+  fmt_number(
+    columns = ends_with("workers"),
+    decimals = 0
+  ) %>%
+  fmt_currency(
+    columns = ends_with("wages"),
+    decimals = 0
+  ) %>%
+  fmt_missing(
+    columns = everything()
+  ) %>%
+  tab_header(
+    title = "Working Wisconsin residents by occupation and median annual wage, 1960-2016",
+    subtitle = "Statistics include part-time and temporary workers"
+  ) %>%
+  tab_source_note(
+    source_note = paste("Statistics are constructed using Census Bureau microdata.", 
+                        "All data was retrieved from IPUMS USA, University of Minnesota, www.ipums.org.",
+                        "Median wages are presented in 2020 real dollars. They include the wages of",
+                        "part-time and temporary workers.")
+  ) %>%
+  tab_footnote(
+    footnote = "2010 and 2016 statistics are created by pooling American Community Survey interviews from 2008-2012 and 2014-2018, respectively.",
+    locations = cells_column_spanners(c("2010", "2016"))
+  )
+```
