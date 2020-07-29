@@ -1,0 +1,29 @@
+---
+aliases:
+- about-us
+- about-hugo
+- contact
+author: John D. Johnson
+date: "2020-05-18"
+title: About
+---
+
+
+
+
+
+<img src="/./about_files/45thParallel.JPG" width="30%" alt="Image" style="float: left; margin: 12px 12px 3px 0px; border: 1px solid #000000;"> 
+
+I'm a Research Fellow at the Marquette Law School's Lubar Center for Public Policy Research and Civic Education where I work on the [Marquette Law Poll](https://law.marquette.edu/poll/) and lots of other projects monitoring election, demographic, and housing trends in the Greater Milwaukee area specifically and Wisconsin generally.
+
+This is my personal website. Opinions expressed here are mine alone and do not represent my employer. Here you'll find personal projects along with code and more detailed discussions from some of my day job projects.
+
+
+### EXTERNAL LINKS
+
+* [Law School blog](https://law.marquette.edu/facultyblog/author/john-johnson/)
+* [Github](https://github.com/jdjohn215/)
+* [Twitter](https://twitter.com/jdjmke)
+* [Personal email](jdjohn215@gmail.com)
+
+The logo image on this website is a cropped image of Milwaukee’s City Hall clock tower. The original image is an circa 1898 “Panoramic View of Milwaukee, Wis. Taken from City Hall Tower” by the Gugler Lithographic Co. It is available in high resolution on the [Library of Congress Website](https://www.loc.gov/item/98508658/).
