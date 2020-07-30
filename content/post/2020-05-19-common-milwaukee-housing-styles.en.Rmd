@@ -13,6 +13,6 @@ Categories: []
 DisableComments: no
 ---
 
-This poster was created using data from the Milwaukee City Assessor's [Master Property File](https://data.milwaukee.gov/dataset/mprop). I recommend using a large screen for ease of viewing.
+This poster was created using data from the Milwaukee City Assessor's [Master Property File](https://data.milwaukee.gov/dataset/mprop). The full size poster is 28 inches wide, so I recommend using a large screen for ease of viewing. Click the image below to expand the size, or [click here to download a full size (11mb) PDF file](https://www.dropbox.com/s/jvwnhv6if9n80j5/Milwaukee_Home_Styles_Johnson.pdf?dl=1).
 
 ![Common Milwaukee Architectural Styles](/post/2020-05-19-common-milwaukee-housing-styles.en_files/Milwaukee_Housing_Styles_Poster.png)
