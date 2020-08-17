@@ -1,0 +1,28 @@
+---
+title: An alternative way of mapping county-level data in Wisconsin
+author: John D. Johnson
+date: '2020-08-17'
+slug: an-alternative-way-of-mapping-county-level-data-in-wisconsin
+categories:
+  - Wisconsin
+tags: []
+Description: ''
+Tags: []
+Categories: []
+DisableComments: no
+---
+
+
+
+<p>The basic flaw of choropleth maps is widely understood. Using land area to represent any other kind of data is inevitably going to leave some kind of misimpression. Objections to choropleth maps often peak right after an election angry losers (and winners) promote the map styles whose visual strategy they find most comforting. As the cartographer Ken Fields has extensively demonstrated, the best way to gain a comprehensive understanding is to consider <a href="https://www.esri.com/arcgis-blog/products/arcgis-pro/mapping/when-a-single-map-isnt-enough/">many different styles of maps</a>. If made well, each will highlight some aspects of the truth, while inevitably obscuring others. There is no one ideal map.</p>
+<p>The <em>New York Times</em> has begun using a new (to me) variation on choropleths for their U.S. COVID-19 county-level maps. Consider the image below.</p>
+<p>This map shows per capita data on recent cases by county. But some of the largest counties in the country also have exceedingly low populations. Using a dark color appropriately emphasizes the <em>intensity</em> of the local outbreak, but (as with votes) coloring the entire county suggests a much <em>larger</em> population than actually exists. So, instead of shading the entire county with the appropriate color, <em>NYT</em> simply shades the parts of the county with a population density of at least 10 people per square mile.</p>
+<p><img src="/post/2020-08-17-an-alternative-way-of-mapping-county-level-data-in-wisconsin.en_files/2020-08-17_Coronavirus_Case_Count.png" style="width:80.0%" /></p>
+<p>I decided to apply <em>NYT</em>’s idea to Wisconsin’s counties specifically. I believe <em>NYT</em> uses census tracts to build their map. I used 2010 census blocks instead. The 2010 Census divided Wisconsin into more than 250,000 tiny blocks–100,000 of them were completely unpopulated and another 10,000 had a population density of less than 10 per square mile. Removing all these blocks still leaves the 98.8% of the population intact.</p>
+<p>Here is the resulting map. Unshaded regions either have no population or a population density of fewer than 10 people per square mile.</p>
+<p><img src="/post/2020-08-17-an-alternative-way-of-mapping-county-level-data-in-wisconsin.en_files/SimpleMap.png" style="width:80.0%" /></p>
+<p><img src="/post/2020-08-17-an-alternative-way-of-mapping-county-level-data-in-wisconsin.en_files/MedianAge.png" style="width:50.0%" /> <img src="/post/2020-08-17-an-alternative-way-of-mapping-county-level-data-in-wisconsin.en_files/Gov2018Margin.png" style="width:50.0%" /></p>
+<div id="download" class="section level3">
+<h3>Download</h3>
+<p>If you’d like to download the county shapefile used to make the maps above, you can access it as <a href="https://www.dropbox.com/s/aqm0iz51rjgdgcx/Counties_minus_blocks_simplified.zip?dl=1">a zip archive here</a>. The zipped size is 1.7MB, and the unzipped shapefile is 2.5MB.</p>
+</div>
