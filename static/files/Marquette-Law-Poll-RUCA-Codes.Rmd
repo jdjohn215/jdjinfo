@@ -1,0 +1,284 @@
+---
+title: "An objective measure of the rural-urban continuum"
+author: "John Johnson"
+date: "8/25/2020"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(tidyverse)
+library(leaflet)
+library(sf)
+library(labelled)
+library(gt)
+library(MLSPTools)
+
+wi.zcta <- read_rds("~/Dropbox/Projects/2020/August/RUCA_post/WI_zcta.rds")
+
+ruca.levels <- wi.zcta %>%
+  st_set_geometry(NULL) %>% 
+  as_tibble() %>%
+  select(starts_with("ruca")) %>%
+  group_by(ruca, ruca5, ruca4, ruca3) %>% 
+  summarise(zips = n())
+
+ruca.pop <- read_rds("~/Dropbox/Projects/2020/August/RUCA_post/RUCA_population.rds")
+
+integ <- read_rds("~/dropbox/mulawpoll1/integcurrent.rds")
+```
+
+## Zipcode-based classification
+
+In recent years, interest has grown in parsing voters' attitudes by their community's degree of *urbanicity* or *rurality*. The Marquette Law Poll asks respondents, "Would you describe the place where you live as urban, suburban or rural?" If necessary, we clarify, "Urban is a big city like Milwaukee, Madison or Green Bay. Suburban is a built up place close to a big city and rural is less built up with fewer people and further away from a big city." 
+
+This self-description is interesting, but it's not entirely clear what it tells us. Each individual defines those terms in their own mind, and many places don't fall neatly within the three offered categories.
+
+Using the [USDA Rural-Urban Commuting Area Codes (RUCA)](https://www.ers.usda.gov/data-products/rural-urban-commuting-area-codes/) I have created an alternative, objective zip-code based geography classification for the Marquette Law Poll. "Objective" does not mean "correct." It simply means that the same data-based methodology has been uniformly applied to each case.
+
+The original USDA RUCA classification is based on both a zip code's location (e.g. within a census-defined urbanized area or urban cluster) as well as how its residents commute. Because it is a measure of economic activity, RUCA does not further distinguish between central cities and suburbs within metro areas. Obviously, the city-suburb distinction is crucial for political research, so I add a new *principal city* code. This consists of all zip codes with a majority of their population inside a [core-based statistical area's principal city](https://www.census.gov/topics/housing/housing-patterns/about/core-based-statistical-areas.html) (or cities).
+
+With my addition of principal cities, here are all 11 RUCA categories along with the number of Wisconsin zip codes in each. I combine the 11 RUCA codes into 5-category, 4-category, and 3-category alternatives as indicated. The 5, 4, and 3-category RUCA breakdowns are available as crosstab variables on the Marquette Law Poll [interactive crosstab web application](https://lubarcenter.shinyapps.io/MLSPCrosstabs/).
+
+```{r}
+ruca.levels %>% select(zips, everything()) %>%
+  ungroup() %>%
+  rename("ruca11" = ruca) %>%
+  gt::gt()
+```
+
+
+## Maps {.tabset}
+
+Click through these tabs to view which zip codes make up each category, for each RUCA level.
+
+### RUCA 11
+
+```{r, fig.align='center'}
+factpal.ruca <- colorFactor(
+  palette = c("black", "#de2d26", "#fc9272", "#fee0d2", # reds
+            "#756bb1", "#bcbddc", "#efedf5", # purples
+            "#3182bd", "#9ecae1", "#deebf7", # blues
+            "#31a354"),
+  domain = unique(ruca.levels$ruca)
+)
+leaflet(wi.zcta) %>%
+  addTiles() %>%  # Add default OpenStreetMap map tiles
+  addPolygons(weight = 0.75, fillOpacity = 0.75,
+              color = ~factpal.ruca(ruca)) %>%
+  addLegend("bottomleft", pal = factpal.ruca,
+            values = ~ruca)
+```
+
+### RUCA 5
+
+```{r, fig.align='center'}
+factpal.ruca5 <- colorFactor(
+  palette = c("black", "#de2d26", "#756bb1", "#3182bd", "#31a354"),
+  domain = unique(ruca.levels$ruca5)
+)
+leaflet(wi.zcta) %>%
+  addTiles() %>%  # Add default OpenStreetMap map tiles
+  addPolygons(weight = 0.75, fillOpacity = 0.75,
+              color = ~factpal.ruca5(ruca5)) %>%
+  addLegend("bottomleft", pal = factpal.ruca5,
+            values = ~ruca5)
+```
+
+### RUCA 4
+
+```{r, fig.align='center'}
+factpal.ruca4 <- colorFactor(
+  palette = c("black", "#de2d26", "#756bb1", "#3182bd"),
+  domain = unique(ruca.levels$ruca4)
+)
+leaflet(wi.zcta) %>%
+  addTiles() %>%  # Add default OpenStreetMap map tiles
+  addPolygons(weight = 0.75, fillOpacity = 0.75,
+              color = ~factpal.ruca4(ruca4)) %>%
+  addLegend("bottomleft", pal = factpal.ruca4,
+            values = ~ruca4)
+```
+
+### RUCA 3
+
+```{r, fig.align='center'}
+factpal.ruca3 <- colorFactor(
+  palette = c("#de2d26", "#756bb1", "#3182bd"),
+  domain = unique(ruca.levels$ruca3)
+)
+leaflet(wi.zcta) %>%
+  addTiles() %>%  # Add default OpenStreetMap map tiles
+  addPolygons(weight = 0.75, fillOpacity = 0.75,
+              color = ~factpal.ruca3(ruca3)) %>%
+  addLegend("bottomleft", pal = factpal.ruca3,
+            values = ~ruca3)
+```
+
+
+## Population {.tabset}
+
+Use the tabs below to see the population of each RUCA category.
+
+### RUCA 11
+```{r}
+ruca.pop %>% filter(category == "ruca11") %>%
+  select(-category) %>%
+  gt(rowname_col = "classification") %>%
+  fmt_number(columns = 2, decimals = 0) %>%
+  fmt_percent(columns = 3, decimals = 0, scale_values = F) %>%
+  tab_header(
+    title = "Wisconsin population"
+  )
+```
+
+### RUCA 5
+```{r}
+ruca.pop %>% filter(category == "ruca5") %>%
+  select(-category) %>%
+  gt(rowname_col = "classification") %>%
+  fmt_number(columns = 2, decimals = 0) %>%
+  fmt_percent(columns = 3, decimals = 0, scale_values = F) %>%
+  tab_header(
+    title = "Wisconsin population"
+  )
+```
+
+### RUCA 4
+```{r}
+ruca.pop %>% filter(category == "ruca4") %>%
+  select(-category) %>%
+  gt(rowname_col = "classification") %>%
+  fmt_number(columns = 2, decimals = 0) %>%
+  fmt_percent(columns = 3, decimals = 0, scale_values = F) %>%
+  tab_header(
+    title = "Wisconsin population"
+  )
+```
+
+### RUCA 3
+```{r}
+ruca.pop %>% filter(category == "ruca3") %>%
+  select(-category) %>%
+  gt(rowname_col = "classification") %>%
+  fmt_number(columns = 2, decimals = 0) %>%
+  fmt_percent(columns = 3, decimals = 0, scale_values = F) %>%
+  tab_header(
+    title = "Wisconsin population"
+  )
+```
+
+
+## Data accuracy
+
+The data underlying the USDA's original 2010 RUCA codes is growing stale. Updated classifications will be available sometime after the 2020 census. Fortunately (for our purposes), Wisconsin's population and economic patterns have changed very little this decade, with the important exception of the Madison metro area. I expect Madison's footprint to expand significantly in the 2020 RUCA vintage. The rest of Wisconsin will probably look much the same.
+
+## RUCA vs self-reported geography {.tabset}
+
+RUCA codes do not line up perfectly with self-reported urban, suburban, or rural status. The following tables show the self-reported geography by RUCA classification, for each level of RUCA.
+
+It seems to me that respondents use a sort of "backporch" test to answer the urban/suburban/rural question. If the view from their house contains fields, they call it "rural." The RUCA classification, on the other hand, is fundamentally an economic judgement. People who live in visually "rural" areas that are nonetheless economically intertwined with larger metros are considered part of a metro area.
+
+### RUCA 11
+
+```{r}
+crosstab(integ, ruca, ac7, remove = c("refused")) %>%
+  rename("classification" = 1) %>%
+  gt(rowname_col = "classification") %>%
+  fmt_percent(columns = 2:5, decimals = 0, scale_values = F) %>%
+  fmt_number(columns = 6, decimals = 0) %>%
+  tab_header(title = "Self-reported geography vs. RUCA geography classification",
+             subtitle = "Marquette Law School Poll, 2015-2020")
+```
+
+### RUCA 5
+
+```{r}
+crosstab(integ, ruca5, ac7, remove = c("refused")) %>%
+  rename("classification" = 1) %>%
+  gt(rowname_col = "classification") %>%
+  fmt_percent(columns = 2:5, decimals = 0, scale_values = F) %>%
+  fmt_number(columns = 6, decimals = 0) %>%
+  tab_header(title = "Self-reported geography vs. RUCA geography classification",
+             subtitle = "Marquette Law School Poll, 2015-2020")
+```
+
+### RUCA 4
+
+```{r}
+crosstab(integ, ruca4, ac7, remove = c("refused")) %>%
+  rename("classification" = 1) %>%
+  gt(rowname_col = "classification") %>%
+  fmt_percent(columns = 2:5, decimals = 0, scale_values = F) %>%
+  fmt_number(columns = 6, decimals = 0) %>%
+  tab_header(title = "Self-reported geography vs. RUCA geography classification",
+             subtitle = "Marquette Law School Poll, 2015-2020")
+```
+
+
+### RUCA 3
+
+```{r}
+crosstab(integ, ruca3, ac7, remove = c("refused")) %>%
+  rename("classification" = 1) %>%
+  gt(rowname_col = "classification") %>%
+  fmt_percent(columns = 2:5, decimals = 0, scale_values = F) %>%
+  fmt_number(columns = 6, decimals = 0) %>%
+  tab_header(title = "Self-reported geography vs. RUCA geography classification",
+             subtitle = "Marquette Law School Poll, 2015-2020")
+```
+
+
+## RUCA and issues
+
+RUCA codes line up nicely with lifestyle questions that we expect to vary along the rural-urban continuum. For example, 47 percent of rural respondents are deer hunters, compared with 38 percent from small towns, 36 percent from exurbs and large towns, 23 percent from the suburbs, and 21 percent from principal cities. 
+
+```{r}
+crosstab(integ, ruca5, ac8, remove = c("refused")) %>%
+  gt(rowname_col = "ruca5") %>%
+  fmt_percent(columns = 2:6, decimals = 0, scale_values = F) %>%
+  fmt_number(columns = 7, decimals = 0) %>%
+  tab_header(title = "Are you or any member of your household a deer hunter?",
+             subtitle = "Marquette Law Poll of Wisconsin registered voters, fall 2019")
+```
+
+&nbsp;
+
+Democratic strength is concentrated in principal cities, where they have a 22-point advantage over Republicans (including independents who lean to either party). Combining all polls taken after 2016, Republicans have a 7-point partisan identification advantage in the suburbs, a 14-point advantage in exurbs and large towns, a 9-point advantage in small towns, and a 16-point lead in isolated rural areas.
+
+&nbsp;
+
+```{r}
+crosstab(integ %>% filter(zendyyyy > 2016), 
+         ruca5, zpidwlean, 
+         remove = c("don't know", "refused", "other/none")) %>%
+  gt(rowname_col = "ruca5") %>%
+  fmt_percent(columns = 2:4, decimals = 0, scale_values = F) %>%
+  fmt_number(columns = 5, decimals = 0) %>%
+  tab_header(title = "Party ID by RUCA code",
+             subtitle = "Wisconsin registered voters, 2017-2020")
+```
+
+&nbsp;
+
+Donald Trump's weakness in the suburbs is clear. Despite a 7-point Republican identification advantage in the suburbs, Trump is tied with Joe Biden among suburban voters when all 2020 polling is combined.
+
+Trump does best with voters from isolated and rural areas, where he has a 17-point lead over Biden. He has an 8-point lead in exurbs and large towns, along with a 6-point lead in small towns.
+
+&nbsp;
+
+```{r}
+crosstab(integ %>% filter(zendyyyy == 2020), 
+         ruca5, f123, 
+         remove = c("don't know", "refused", "other/none")) %>%
+  gt(rowname_col = "ruca5") %>%
+  fmt_percent(columns = 2:4, decimals = 0, scale_values = F) %>%
+  fmt_number(columns = 5, decimals = 0) %>%
+  tab_header(title = "Biden vs Trump by RUCA code",
+             subtitle = "Wisconsin registered voters, all 2020 polls through August")
+```
+
+&nbsp;
