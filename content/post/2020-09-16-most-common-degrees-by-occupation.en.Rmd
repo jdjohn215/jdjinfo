@@ -1,0 +1,58 @@
+---
+title: Most common degrees by occupation
+author: John D. Johnson
+date: '2020-09-16'
+slug: most-common-degrees-by-occupation
+categories:
+  - Jobs
+  - United States
+tags: []
+Description: ''
+Tags: []
+Categories: []
+DisableComments: no
+output: 
+  html_document
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(reactable)
+d <- readRDS("/Users/johnsonjoh/Dropbox/Projects/2020/September/GenderIncome/data/DegreesAndOccupations.rds") %>%
+  select(occupation = OCC2010, "pct w/degree" = 2,
+         "most common_degree" = 3, "most common_pct" = 6,
+         "2nd most common_degree" = 4, "2nd most common_pct" = 7,
+         "3rd most common_degree" = 5, "3rd most common_pct" = 8)
+```
+
+This table shows the share of workers in each occupational category with a bachelor's degree, along with the top three most common degrees for each job. I built the table using over 7 million interviews from the 2014-18 American Community Survey, but occupations with very small numbers of college degree holders nonetheless have large margins of error for the most common college degrees.
+
+Data source:
+
+> Steven Ruggles, Sarah Flood, Ronald Goeken, Josiah Grover, Erin Meyer, Jose Pacas and Matthew Sobek. IPUMS USA: Version 10.0 [dataset]. Minneapolis, MN: IPUMS, 2020.
+https://doi.org/10.18128/D010.V10.0
+
+```{r, echo=FALSE}
+reactable(d, searchable = TRUE, filterable = TRUE, striped = TRUE,
+          columns = list(
+            "pct w/degree" = colDef(format = colFormat(suffix = "%", digits = 0)),
+            "most common_pct" = colDef(format = colFormat(suffix = "%", digits = 0),
+                                       name = "pct"),
+            "2nd most common_pct" = colDef(format = colFormat(suffix = "%", digits = 0),
+                                           name = "pct"),
+            "3rd most common_pct" = colDef(format = colFormat(suffix = "%", digits = 0),
+                                           name = "pct"),
+            "most common_degree" = colDef(name = "degree"),
+            "2nd most common_degree" = colDef(name = "degree"),
+            "3rd most common_degree" = colDef(name = "degree")
+          ),
+          columnGroups = list(
+            colGroup(name = "most common degree", 
+                     columns = c("most common_degree", "most common_pct")),
+            colGroup(name = "2nd most common degree", 
+                     columns = c("2nd most common_degree", "2nd most common_pct")),
+            colGroup(name = "3rd most common degree", 
+                     columns = c("3rd most common_degree", "3rd most common_pct"))
+          ))
+
+```
