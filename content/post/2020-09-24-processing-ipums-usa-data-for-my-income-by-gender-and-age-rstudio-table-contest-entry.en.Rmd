@@ -13,7 +13,7 @@ Categories: []
 DisableComments: no
 ---
 
-The following R code processes 2014-18 ACS microdata retrieved from IPUMS-USA into the summary tables used to build my RStudio 2020 Table Contest entry. The output tables can be retrieved at these links:
+The following R code processes 2014-18 ACS microdata retrieved from IPUMS-USA into the summary tables used to build my [RStudio 2020 Table Contest entry](https://rpubs.com/jdjohn215/three-way-crosstab-table-with-gt). The output tables can be retrieved at these links:
 
 * [https://johndjohnson.info/files/income_by_sex_and_age.csv](https://johndjohnson.info/files/income_by_sex_and_age.csv)
 * [https://johndjohnson.info/files/total_jobs_by_sex.csv](https://johndjohnson.info/files/total_jobs_by_sex.csv)
