@@ -1,0 +1,69 @@
+---
+title: Processing IPUMS-USA data for my income by gender and age RStudio Table Contest
+  entry
+author: John D. Johnson
+date: '2020-09-24'
+slug: processing-ipums-usa-data-for-my-income-by-gender-and-age-rstudio-table-contest-entry
+categories:
+  - United States
+tags: []
+Description: ''
+Tags: []
+Categories: []
+DisableComments: no
+---
+
+
+
+<p>The following R code processes 2014-18 ACS microdata retrieved from IPUMS-USA into the summary tables used to build my RStudio 2020 Table Contest entry. The output tables can be retrieved at these links:</p>
+<ul>
+<li><a href="https://johndjohnson.info/files/income_by_sex_and_age.csv">https://johndjohnson.info/files/income_by_sex_and_age.csv</a></li>
+<li><a href="https://johndjohnson.info/files/total_jobs_by_sex.csv">https://johndjohnson.info/files/total_jobs_by_sex.csv</a></li>
+</ul>
+<pre><code># NOTE: I cannot provide the source data for this table myself.
+# You must download it from IPUMS-USA https://usa.ipums.org/usa/index.shtml
+
+if (!require(&quot;ipumsr&quot;)) stop(&quot;Reading IPUMS data into R requires the ipumsr package. It can be installed using the following command: install.packages(&#39;ipumsr&#39;)&quot;)
+library(tidyverse)
+library(pollster)
+library(labelled)
+
+# This data was downloaded from IPUMS USA. It is the 2014-18 ACS microdata.
+# The dataset is national, but it is filtered for people who are employed
+ddi &lt;- read_ipums_ddi(&quot;data/usa_00050.xml&quot;)
+data &lt;- read_ipums_micro(ddi)
+
+fulltime &lt;- data %&gt;% 
+  filter(UHRSWORK &gt;= 37) %&gt;%
+  mutate(
+    age_category = case_when(
+      AGE &lt; 35 ~ &quot;Under 35&quot;,
+      AGE %in% 35:49 ~ &quot;35 to 50&quot;,
+      AGE &gt;= 50 ~ &quot;50 plus&quot;),
+    age_category = factor(age_category,
+                          levels = c(&quot;Under 35&quot;, &quot;35 to 50&quot;, &quot;50 plus&quot;)))
+
+total.jobs &lt;- topline(fulltime, OCC2010, PERWT)
+top.jobs &lt;- total.jobs %&gt;%
+  slice_max(Frequency, n = 20) %&gt;% 
+  mutate(Response = as.character(Response)) %&gt;%
+  pull(Response)
+
+# fulltime workers in the top 20 occupations
+fulltime.top.jobs &lt;- fulltime %&gt;%
+  mutate(OCC2010 = to_character(OCC2010)) %&gt;%
+  filter(OCC2010 %in% top.jobs)
+
+income.by.sex.age &lt;- fulltime.top.jobs %&gt;%
+  mutate(SEX = to_factor(SEX)) %&gt;%
+  group_by(OCC2010, SEX, age_category) %&gt;%
+  summarise(median_wage = Hmisc::wtd.quantile(INCWAGE, weights = PERWT, probs = 0.5)) %&gt;%
+  ungroup()
+income.by.sex.age
+
+jobs.by.sex &lt;- crosstab(fulltime.top.jobs, OCC2010, SEX, PERWT,
+                        unwt_n = T, format = &quot;long&quot;) %&gt;%
+  mutate(age_category = &quot;total&quot;)
+
+write_csv(income.by.sex.age, &quot;data/income_by_sex_and_age.csv&quot;)
+write_csv(jobs.by.sex, &quot;data/total_jobs_by_sex.csv&quot;)</code></pre>

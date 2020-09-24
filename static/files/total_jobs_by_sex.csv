@@ -1,0 +1,41 @@
+OCC2010,SEX,pct,n,unweighted_n,age_category
+Accountants and Auditors,Male,40.605669875474696,1698450,85524,total
+Accountants and Auditors,Female,59.39433012452531,1698450,85524,total
+Chefs and Cooks,Male,67.91657102951953,1537931,60069,total
+Chefs and Cooks,Female,32.08342897048047,1537931,60069,total
+Chief executives and legislators/public administration,Male,76.0929965391444,1110708,57858,total
+Chief executives and legislators/public administration,Female,23.9070034608556,1110708,57858,total
+Computer Scientists and Systems Analysts/Network systems Analysts/Web Developers,Male,71.16226970163444,1505167,71645,total
+Computer Scientists and Systems Analysts/Network systems Analysts/Web Developers,Female,28.837730298365567,1505167,71645,total
+Construction Laborers,Male,97.34369815285919,1446560,58108,total
+Construction Laborers,Female,2.6563018471408033,1446560,58108,total
+Customer Service Representatives,Male,35.24612225991813,1917096,84546,total
+Customer Service Representatives,Female,64.75387774008188,1917096,84546,total
+Driver/Sales Workers and Truck Drivers,Male,95.1909743262851,2986946,137864,total
+Driver/Sales Workers and Truck Drivers,Female,4.809025673714892,2986946,137864,total
+Elementary and Middle School Teachers,Male,21.905728911694137,2978262,158680,total
+Elementary and Middle School Teachers,Female,78.09427108830587,2978262,158680,total
+Financial Managers,Male,47.49140730729509,1098026,53799,total
+Financial Managers,Female,52.508592692704916,1098026,53799,total
+First-Line Supervisors of Office and Administrative Support Workers,Male,40.247629404488364,1197273,59351,total
+First-Line Supervisors of Office and Administrative Support Workers,Female,59.75237059551163,1197273,59351,total
+First-Line Supervisors of Sales Workers,Male,61.25764211889193,3803101,178512,total
+First-Line Supervisors of Sales Workers,Female,38.74235788110808,3803101,178512,total
+Janitors and Building Cleaners,Male,74.46442996261395,1651418,74742,total
+Janitors and Building Cleaners,Female,25.53557003738605,1651418,74742,total
+"Laborers and Freight, Stock, and Material Movers, Hand",Male,83.06307143783977,1549053,69348,total
+"Laborers and Freight, Stock, and Material Movers, Hand",Female,16.936928562160237,1549053,69348,total
+"Managers, nec (including Postmasters)",Male,65.94315739852247,4055972,201003,total
+"Managers, nec (including Postmasters)",Female,34.05684260147753,4055972,201003,total
+"Nursing, Psychiatric, and Home Health Aides",Male,14.315815230689758,1176992,48667,total
+"Nursing, Psychiatric, and Home Health Aides",Female,85.68418476931025,1176992,48667,total
+Registered Nurses,Male,12.98985256982026,2084173,102224,total
+Registered Nurses,Female,87.01014743017974,2084173,102224,total
+Retail Salespersons,Male,62.6110645840664,1742117,76833,total
+Retail Salespersons,Female,37.3889354159336,1742117,76833,total
+"Sales Representatives, Wholesale and Manufacturing",Male,73.88193707225624,1239644,61087,total
+"Sales Representatives, Wholesale and Manufacturing",Female,26.118062927743775,1239644,61087,total
+Secretaries and Administrative Assistants,Male,5.7465965710698725,2243032,118095,total
+Secretaries and Administrative Assistants,Female,94.25340342893013,2243032,118095,total
+"Software Developers, Applications and Systems Software",Male,80.96666937647345,1230100,58938,total
+"Software Developers, Applications and Systems Software",Female,19.033330623526542,1230100,58938,total

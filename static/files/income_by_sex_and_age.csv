@@ -1,0 +1,121 @@
+OCC2010,SEX,age_category,median_wage
+Accountants and Auditors,Male,Under 35,58218
+Accountants and Auditors,Male,35 to 50,84681
+Accountants and Auditors,Male,50 plus,84638
+Accountants and Auditors,Female,Under 35,51232
+Accountants and Auditors,Female,35 to 50,61000
+Accountants and Auditors,Female,50 plus,60000
+Chefs and Cooks,Male,Under 35,22000
+Chefs and Cooks,Male,35 to 50,28000
+Chefs and Cooks,Male,50 plus,28690
+Chefs and Cooks,Female,Under 35,20000
+Chefs and Cooks,Female,35 to 50,21000
+Chefs and Cooks,Female,50 plus,21594
+Chief executives and legislators/public administration,Male,Under 35,79388
+Chief executives and legislators/public administration,Male,35 to 50,136158
+Chief executives and legislators/public administration,Male,50 plus,147059
+Chief executives and legislators/public administration,Female,Under 35,71725
+Chief executives and legislators/public administration,Female,35 to 50,105798
+Chief executives and legislators/public administration,Female,50 plus,107587
+Computer Scientists and Systems Analysts/Network systems Analysts/Web Developers,Male,Under 35,57605
+Computer Scientists and Systems Analysts/Network systems Analysts/Web Developers,Male,35 to 50,84681
+Computer Scientists and Systems Analysts/Network systems Analysts/Web Developers,Male,50 plus,92217
+Computer Scientists and Systems Analysts/Network systems Analysts/Web Developers,Female,Under 35,52926
+Computer Scientists and Systems Analysts/Network systems Analysts/Web Developers,Female,35 to 50,72269
+Computer Scientists and Systems Analysts/Network systems Analysts/Web Developers,Female,50 plus,75000
+Construction Laborers,Male,Under 35,26449
+Construction Laborers,Male,35 to 50,31421
+Construction Laborers,Male,50 plus,31739
+Construction Laborers,Female,Under 35,25616
+Construction Laborers,Female,35 to 50,28580
+Construction Laborers,Female,50 plus,31739
+Customer Service Representatives,Male,Under 35,30000
+Customer Service Representatives,Male,35 to 50,43035
+Customer Service Representatives,Male,50 plus,46109
+Customer Service Representatives,Female,Under 35,27825
+Customer Service Representatives,Female,35 to 50,35500
+Customer Service Representatives,Female,50 plus,37297
+Driver/Sales Workers and Truck Drivers,Male,Under 35,31739
+Driver/Sales Workers and Truck Drivers,Male,35 to 50,42340
+Driver/Sales Workers and Truck Drivers,Male,50 plus,43377
+Driver/Sales Workers and Truck Drivers,Female,Under 35,25000
+Driver/Sales Workers and Truck Drivers,Female,35 to 50,31421
+Driver/Sales Workers and Truck Drivers,Female,50 plus,31739
+Elementary and Middle School Teachers,Male,Under 35,44674
+Elementary and Middle School Teachers,Male,35 to 50,58218
+Elementary and Middle School Teachers,Male,50 plus,63511
+Elementary and Middle School Teachers,Female,Under 35,42319
+Elementary and Middle School Teachers,Female,35 to 50,52899
+Elementary and Middle School Teachers,Female,50 plus,57605
+Financial Managers,Male,Under 35,60747
+Financial Managers,Male,35 to 50,109974
+Financial Managers,Male,50 plus,117833
+Financial Managers,Female,Under 35,44457
+Financial Managers,Female,35 to 50,69126
+Financial Managers,Female,50 plus,70920
+First-Line Supervisors of Office and Administrative Support Workers,Male,Under 35,40985
+First-Line Supervisors of Office and Administrative Support Workers,Male,35 to 50,60000
+First-Line Supervisors of Office and Administrative Support Workers,Male,50 plus,67626
+First-Line Supervisors of Office and Administrative Support Workers,Female,Under 35,36887
+First-Line Supervisors of Office and Administrative Support Workers,Female,35 to 50,47633
+First-Line Supervisors of Office and Administrative Support Workers,Female,50 plus,50783
+First-Line Supervisors of Sales Workers,Male,Under 35,38087
+First-Line Supervisors of Sales Workers,Male,35 to 50,55330
+First-Line Supervisors of Sales Workers,Male,50 plus,56355
+First-Line Supervisors of Sales Workers,Female,Under 35,31739
+First-Line Supervisors of Sales Workers,Female,35 to 50,42319
+First-Line Supervisors of Sales Workers,Female,50 plus,40985
+Janitors and Building Cleaners,Male,Under 35,24090
+Janitors and Building Cleaners,Male,35 to 50,31421
+Janitors and Building Cleaners,Male,50 plus,32678
+Janitors and Building Cleaners,Female,Under 35,19044
+Janitors and Building Cleaners,Female,35 to 50,21517
+Janitors and Building Cleaners,Female,50 plus,24333
+"Laborers and Freight, Stock, and Material Movers, Hand",Male,Under 35,25000
+"Laborers and Freight, Stock, and Material Movers, Hand",Male,35 to 50,33855
+"Laborers and Freight, Stock, and Material Movers, Hand",Male,50 plus,37029
+"Laborers and Freight, Stock, and Material Movers, Hand",Female,Under 35,20947
+"Laborers and Freight, Stock, and Material Movers, Hand",Female,35 to 50,26184
+"Laborers and Freight, Stock, and Material Movers, Hand",Female,50 plus,29638
+"Managers, nec (including Postmasters)",Male,Under 35,55000
+"Managers, nec (including Postmasters)",Male,35 to 50,87094
+"Managers, nec (including Postmasters)",Male,50 plus,93102
+"Managers, nec (including Postmasters)",Female,Under 35,50000
+"Managers, nec (including Postmasters)",Female,35 to 50,74058
+"Managers, nec (including Postmasters)",Female,50 plus,74096
+"Nursing, Psychiatric, and Home Health Aides",Male,Under 35,25404
+"Nursing, Psychiatric, and Home Health Aides",Male,35 to 50,31739
+"Nursing, Psychiatric, and Home Health Aides",Male,50 plus,32814
+"Nursing, Psychiatric, and Home Health Aides",Female,Under 35,23076
+"Nursing, Psychiatric, and Home Health Aides",Female,35 to 50,26641
+"Nursing, Psychiatric, and Home Health Aides",Female,50 plus,28690
+Registered Nurses,Male,Under 35,60000
+Registered Nurses,Male,35 to 50,79000
+Registered Nurses,Male,50 plus,81971
+Registered Nurses,Female,Under 35,55043
+Registered Nurses,Female,35 to 50,68769
+Registered Nurses,Female,50 plus,75154
+Retail Salespersons,Male,Under 35,29510
+Retail Salespersons,Male,35 to 50,45000
+Retail Salespersons,Male,50 plus,42319
+Retail Salespersons,Female,Under 35,23400
+Retail Salespersons,Female,35 to 50,30739
+Retail Salespersons,Female,50 plus,29400
+"Sales Representatives, Wholesale and Manufacturing",Male,Under 35,49750
+"Sales Representatives, Wholesale and Manufacturing",Male,35 to 50,76213
+"Sales Representatives, Wholesale and Manufacturing",Male,50 plus,76174
+"Sales Representatives, Wholesale and Manufacturing",Female,Under 35,45561
+"Sales Representatives, Wholesale and Manufacturing",Female,35 to 50,63000
+"Sales Representatives, Wholesale and Manufacturing",Female,50 plus,57605
+Secretaries and Administrative Assistants,Male,Under 35,32797
+Secretaries and Administrative Assistants,Male,35 to 50,47132
+Secretaries and Administrative Assistants,Male,50 plus,50000
+Secretaries and Administrative Assistants,Female,Under 35,30739
+Secretaries and Administrative Assistants,Female,35 to 50,37048
+Secretaries and Administrative Assistants,Female,50 plus,40541
+"Software Developers, Applications and Systems Software",Male,Under 35,84000
+"Software Developers, Applications and Systems Software",Male,35 to 50,114163
+"Software Developers, Applications and Systems Software",Male,50 plus,115211
+"Software Developers, Applications and Systems Software",Female,Under 35,75823
+"Software Developers, Applications and Systems Software",Female,35 to 50,94266
+"Software Developers, Applications and Systems Software",Female,50 plus,95218
