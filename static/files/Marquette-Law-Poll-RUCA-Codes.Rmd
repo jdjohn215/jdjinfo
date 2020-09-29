@@ -39,7 +39,7 @@ This self-description is interesting, but it's not entirely clear what it tells 
 
 Using the [USDA Rural-Urban Commuting Area Codes (RUCA)](https://www.ers.usda.gov/data-products/rural-urban-commuting-area-codes/) I have created an alternative, objective zip-code based geography classification for the Marquette Law Poll. "Objective" does not mean "correct." It simply means that the same data-based methodology has been uniformly applied to each case.
 
-The original USDA RUCA classification is based on both a zip code's location (e.g. within a census-defined urbanized area or urban cluster) as well as how its residents commute. Because it is a measure of economic activity, RUCA does not further distinguish between central cities and suburbs within metro areas. Obviously, the city-suburb distinction is crucial for political research, so I add a new *principal city* code. This consists of all zip codes with a majority of their population inside a [core-based statistical area's principal city](https://www.census.gov/topics/housing/housing-patterns/about/core-based-statistical-areas.html) (or cities).
+The original USDA RUCA classification is based on both a zip code's location (e.g. within a census-defined urbanized area or urban cluster) as well as how its residents commute. Because it is a measure of economic activity, RUCA does not further distinguish between central cities and suburbs within metro areas. Obviously, the city-suburb distinction is crucial for political research, so I add a new *principal city* code. This consists of all zip codes with a majority of their population inside a [metropolitan statistical area's principal city](https://www.census.gov/topics/housing/housing-patterns/about/core-based-statistical-areas.html) (or cities).
 
 With my addition of principal cities, here are all 11 RUCA categories along with the number of Wisconsin zip codes in each. I combine the 11 RUCA codes into 5-category, 4-category, and 3-category alternatives as indicated. The 5, 4, and 3-category RUCA breakdowns are available as crosstab variables on the Marquette Law Poll [interactive crosstab web application](https://lubarcenter.shinyapps.io/MLSPCrosstabs/).
 
@@ -234,7 +234,7 @@ crosstab(integ, ruca3, ac7, remove = c("refused")) %>%
 
 ## RUCA and issues
 
-RUCA codes line up nicely with lifestyle questions that we expect to vary along the rural-urban continuum. For example, 47 percent of rural respondents are deer hunters, compared with 38 percent from small towns, 36 percent from exurbs and large towns, 23 percent from the suburbs, and 21 percent from principal cities. 
+RUCA codes line up nicely with lifestyle questions that we expect to vary along the rural-urban continuum. For example, 48 percent of rural respondents are deer hunters, compared with 38 percent from small towns, 36 percent from exurbs and large towns, 22 percent from the suburbs, and 19 percent from principal cities. 
 
 ```{r}
 crosstab(integ, ruca5, ac8, remove = c("refused")) %>%
@@ -247,7 +247,7 @@ crosstab(integ, ruca5, ac8, remove = c("refused")) %>%
 
 &nbsp;
 
-Democratic strength is concentrated in principal cities, where they have a 22-point advantage over Republicans (including independents who lean to either party). Combining all polls taken after 2016, Republicans have a 7-point partisan identification advantage in the suburbs, a 14-point advantage in exurbs and large towns, a 9-point advantage in small towns, and a 16-point lead in isolated rural areas.
+Democratic strength is concentrated in principal cities, where they have a 26-point advantage over Republicans (including independents who lean to either party). Combining all polls taken after 2016, Republicans have a 8-point partisan identification advantage in the suburbs, an 11-point advantage in exurbs and large towns, a 10-point advantage in small towns, and a 16-point lead in isolated rural areas.
 
 &nbsp;
 
@@ -264,21 +264,22 @@ crosstab(integ %>% filter(zendyyyy > 2016),
 
 &nbsp;
 
-Donald Trump's weakness in the suburbs is clear. Despite a 7-point Republican identification advantage in the suburbs, Trump is tied with Joe Biden among suburban voters when all 2020 polling is combined.
+Donald Trump's weakness in the suburbs is clear. Despite a 8-point Republican identification advantage in the suburbs, Trump leads Joe Biden by just 1 point among suburban voters when all 2020 polling is combined.
 
-Trump does best with voters from isolated and rural areas, where he has a 17-point lead over Biden. He has an 8-point lead in exurbs and large towns, along with a 6-point lead in small towns.
+Trump does best with voters from isolated and rural areas, where he has a 15-point lead over Biden. He has an 7-point lead in exurbs and large towns, along with an 8-point lead in small towns.
 
 &nbsp;
 
 ```{r}
 crosstab(integ %>% filter(zendyyyy == 2020), 
-         ruca5, f123, 
-         remove = c("don't know", "refused", "other/none")) %>%
+         ruca5, f123i, 
+         remove = c("don't know", "jo jorgensen", "none/other (vol)",
+                    "refused", "other/none")) %>%
   gt(rowname_col = "ruca5") %>%
-  fmt_percent(columns = 2:4, decimals = 0, scale_values = F) %>%
-  fmt_number(columns = 5, decimals = 0) %>%
+  fmt_percent(columns = 2:3, decimals = 0, scale_values = F) %>%
+  fmt_number(columns = 4, decimals = 0) %>%
   tab_header(title = "Biden vs Trump by RUCA code",
-             subtitle = "Wisconsin registered voters, all 2020 polls through August")
+             subtitle = "Wisconsin registered voters, all 2020 polls through September")
 ```
 
 &nbsp;
