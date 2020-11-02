@@ -1,0 +1,93 @@
+---
+title: Changes in Wisconsin voter registration from October 1 to November 1, 2020
+author: John D. Johnson
+date: '2020-11-02'
+slug: changes-in-wisconsin-voter-registration-from-october-1-to-november-1-2020
+categories:
+  - Wisconsin
+  - Elections
+tags: []
+Description: ''
+Tags: []
+Categories: []
+DisableComments: no
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+
+library(tidyverse)
+library(reactable)
+library(gt)
+
+counties <- read_rds("/Users/johnsonjoh/Dropbox/Projects/2020/October/EarlyVoting/RV/RV_Oct_Nov_Counties.rds")
+municipalities <- read_rds("/Users/johnsonjoh/Dropbox/Projects/2020/October/EarlyVoting/RV/RV_Oct_Nov_Municipalities.rds")
+wards <- read_rds("/Users/johnsonjoh/Dropbox/Projects/2020/October/EarlyVoting/RV/RV_Oct_Nov_Wards.rds")
+age<- read_rds("/Users/johnsonjoh/Dropbox/Projects/2020/October/EarlyVoting/RV/RV_Oct_Nov_Age.rds")
+```
+
+The following tables compare voter registration totals from the Wisconsin Election Commission on [October 1st](https://elections.wi.gov/node/7147) and [November 1st](https://elections.wi.gov/node/7220) 2020.
+
+## County registered voter totals
+```{r}
+counties %>%
+  mutate(county = str_to_title(county)) %>%
+  select(county, october, november, change, pct_change, `voting age citizens` = vep, `nov pct of voting age citizens` = nov_pct_of_vep) %>%
+  reactable(filterable = T,
+            columns = list(
+              october = colDef(format = colFormat(separators = T)),
+              november = colDef(format = colFormat(separators = T)),
+              change = colDef(format = colFormat(separators = T)),
+              `voting age citizens` = colDef(format = colFormat(separators = T)),
+              pct_change = colDef(format = colFormat(suffix = "%", digits = 1)),
+              `nov pct of voting age citizens` = colDef(format = colFormat(suffix = "%", digits = 1))
+            ))
+```
+
+## Municipality registered voter totals
+```{r}
+municipalities %>%
+  mutate(county = str_to_title(county),
+         municipality = str_to_title(municipality)) %>%
+  select(county, municipality, october, november, change, pct_change) %>%
+  reactable(filterable = T,
+            columns = list(
+              october = colDef(format = colFormat(separators = T)),
+              november = colDef(format = colFormat(separators = T)),
+              change = colDef(format = colFormat(separators = T)),
+              pct_change = colDef(format = colFormat(suffix = "%", digits = 1))
+            ))
+```
+
+
+## Ward registered voter totals
+```{r}
+wards %>%
+  mutate(county = str_to_title(county)) %>%
+  select(county, ward, october, november, change, pct_change) %>%
+  reactable(filterable = T,
+            columns = list(
+              october = colDef(format = colFormat(separators = T)),
+              november = colDef(format = colFormat(separators = T)),
+              change = colDef(format = colFormat(separators = T)),
+              pct_change = colDef(format = colFormat(suffix = "%", digits = 1))
+            ))
+```
+
+
+## Age group registered voter totals
+```{r}
+age %>%
+  select(age_group, october, november, change, pct_change) %>%
+  reactable(filterable = T,
+            columns = list(
+              october = colDef(format = colFormat(separators = T)),
+              november = colDef(format = colFormat(separators = T)),
+              change = colDef(format = colFormat(separators = T)),
+              pct_change = colDef(format = colFormat(suffix = "%", digits = 1))
+            ))
+```
+
+
+*Eagle-eyed readers may notice that the total number of registered voters is not exactly identical between the files. I believe this is because the WEC's files are created from a "live" system continuously receiving updates from local clerks. Consequently, data for individual records may be updated between the time it takes to run, e.g., the county and ward summary scripts.*
