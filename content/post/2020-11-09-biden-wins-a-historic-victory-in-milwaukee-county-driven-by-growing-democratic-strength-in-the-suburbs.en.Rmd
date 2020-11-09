@@ -1,0 +1,267 @@
+---
+title: Biden wins a historic victory in Milwaukee County, driven by   growing Democratic
+  strength in the suburbs
+author: John Johnson
+date: '2020-11-09'
+slug: 2020-milwaukee-county-analysis
+categories:
+  - Milwaukee
+  - Elections
+tags: []
+Description: ''
+Tags: []
+Categories: []
+DisableComments: no
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(tidyverse)
+library(leaflet)
+library(sf)
+library(tmap)
+library(gt)
+
+all.wards.sf <- read_rds("/Users/johnsonjoh/Dropbox/Projects/2020/November/MilwaukeeCountyVotes/AllMilwaukeeCountyWards_Pres2000-2020.rds")
+suburbs.all <- read_rds("/Users/johnsonjoh/Dropbox/Projects/2020/November/MilwaukeeCountyVotes/MilwaukeeCountySuburbs_2000to2020.rds")
+aldermanic.votes <- read_rds("~/Dropbox/Projects/2020/November/MilwaukeeCountyVotes/MilwaukeeAldermanicDistrictVoteStats.rds")
+aldermanic.census <- readRDS("~/Dropbox/Projects/2020/November/MilwaukeeCountyVotes/MilwaukeeAldermanicDistrictCensusStats.rds") %>%
+  mutate(aldermanic_district = as.numeric(aldermanic_district))
+aldermanic.stats <- inner_join(aldermanic.votes, aldermanic.census)
+
+suburban.votes <- read_rds("/Users/johnsonjoh/Dropbox/Projects/2020/November/MilwaukeeCountyVotes/MilwaukeeCountySuburbs_2000to2020.rds")
+
+suburbs.all %>% 
+  filter(race == "PRE") %>% 
+  group_by(year) %>% 
+  summarise(tot = sum(TOT), rep = sum(REP), dem = sum(DEM)) %>%
+  mutate(net = dem - rep)
+```
+
+Joseph Biden and Kamala Harris netted a larger number of votes than any other Democrat in Milwaukee County's history. According to unofficial returns, they received 182,896 more votes than Donald Trump and Mike Pence. In percentage terms, this 40-point margin of victory is only exceeded by Franklin Delano Roosevelt's 1932 and 1936 campaigns (45- and 56-point victories, respectively), going back at least to 1892.
+
+The City of Milwaukee delivered its usual overwhelmingly Democratic trove of votes, but it did not contribute more dramatically to this record-breaking performance. Rather, a remarkable blue wave in Milwaukee's innermost suburbs further recast the region's political complexion. In the City of Milwaukee net votes cast for the Biden/Harris ticket exceeded those cast for Clinton in 2016 by about 3,000 votes. However, the Milwaukee county suburbs collectively netted the Democratic ticket over 17,000 more votes in 2020 than 2016.
+
+```{r, warning=FALSE, message=FALSE}
+inner_join(
+  suburbs.all %>% 
+  filter(race == "PRE") %>% 
+  group_by(year) %>% 
+  summarise(tot = sum(TOT), rep = sum(REP), dem = sum(DEM)) %>%
+  mutate(net = dem - rep) %>%
+  select(year, suburbs = net),
+aldermanic.votes %>%
+  filter(race == "PRE") %>% 
+  group_by(year) %>% 
+  summarise(tot = sum(TOT), rep = sum(REP), dem = sum(DEM)) %>%
+  mutate(net = dem - rep) %>%
+  select(year, city = net)
+) %>%
+  mutate(year = as.numeric(paste0("20", year))) %>%
+  gt(rowname_col = "year") %>%
+  tab_header("Net votes for the Democratic presidential candidate in the City of Milwaukee and the Milwaukee County suburbs") %>%
+  fmt_number(columns = 2:3, decimals = 0) %>%
+  tab_footnote("unofficial returns", locations = cells_stub(rows = 6)) %>%
+  tab_options(table.width = "500px")
+```
+
+```{r, warning=FALSE, message=FALSE, fig.width=10, fig.height=6, fig.align='center'}
+tm_shape(all.wards.sf) +
+  tm_borders(col = "white", lwd = 0.2) +
+  tm_fill(col = "dem_margin", palette = "RdBu",
+          style = "cont",
+          breaks = c(-100,-20,-10,0,10,20,30,
+                     40,50,60,70,80,90,100),
+          title = "Dem % minus Rep %") +
+  tm_facets(by = "year", ncol = 3, nrow = 2) +
+  tm_layout(main.title = "Presidential elections in Milwaukee County, 2000 - 2020",
+            frame = FALSE, fontfamily = "serif")
+```
+*Data note: the 2000-2016 maps show votes by wards, disaggregated by the Wisconsin Legislative Technology Services Bureau. The 2020 map shows unofficial election results in reporting units.*
+
+-------------------------------------------------
+
+The rest of this post will explore these trends in more detail. Use the map to explore some of the data yourself. You can toggle between the 2016 and 2020 results or the shift between them. Hover over each polygon to read vote statistics.
+
+*Data note: the suburbs often report their election results in combinations of wards called "reporting units." The boundaries of these units do not necessarily stay the same from one election to another. For this reason, I present the results for each suburb as a single unit in these maps. The City of Milwaukee does not use reporting units, so I'm able to present ward results over time.*
+
+```{r, message=FALSE, warning=FALSE}
+
+all2016 <- read_rds("/Users/johnsonjoh/Dropbox/Projects/2020/November/MilwaukeeCountyVotes/Report/LeafletFiles/All2016.rds")
+all2020 <- read_rds("/Users/johnsonjoh/Dropbox/Projects/2020/November/MilwaukeeCountyVotes/Report/LeafletFiles/All2020.rds")
+allshifts <- read_rds("/Users/johnsonjoh/Dropbox/Projects/2020/November/MilwaukeeCountyVotes/Report/LeafletFiles/AllShifts.rds")
+margin.pal <- colorNumeric(palette = "RdBu", domain = c(-100, 100))
+shift.pal <- colorBin(palette = "RdBu", bins = c(-Inf, -20, -15, -10, -5,
+                                                 0, 5, 10, 15, 20, Inf))
+
+leaflet() %>%
+  addProviderTiles(providers$CartoDB.Positron) %>%
+  setView(lat = 43.042361, lng = -87.972628, zoom = 11) %>%
+  addPolygons(data = allshifts,
+              group = "Shifts",
+              fillColor = ~shift.pal(margin_shift),
+              weight = 0.5, fillOpacity = 0.75,
+              label = ~lapply(label, htmltools::HTML)) %>%
+  addPolygons(data = all2016,
+              group = "Margin 2016",
+              fillColor = ~margin.pal(dem_margin),
+              weight = 0.5, fillOpacity = 0.75,
+              label = ~lapply(label, htmltools::HTML)) %>%
+  addPolygons(data = all2020,
+              group = "Margin 2020",
+              fillColor = ~margin.pal(dem_margin),
+              weight = 0.5, fillOpacity = 0.75,
+              label = ~lapply(label, htmltools::HTML)) %>%
+  addLayersControl(baseGroups = c("Shifts", "Margin 2016", "Margin 2020"),
+                   options = layersControlOptions(collapsed = FALSE))
+```
+
+-------------------------------------------------
+
+### Turnout in the City of Milwaukee
+
+The total number of ballots cast in the City of Milwaukee declined by 157 from 2016 to 2020. There were 16,840 fewer registered voters in Milwaukee on Election Day 2020 than on November 2, 2016 (the most comparable date for which I have data). Consequently, turnout as a share of registered voters rose from 74.6% in 2016 to 78.5% in 2020. However, turnout as a share of the adult, citizen population grew only two-tenths of a percent--from 61.0% to 61.2% (using the most recent population estimates). Several wards near college campuses saw big declines in registered voters and total ballots cast. This likely reflects the smaller number of students on campus this year.
+
+This overall stability obscures the fact that significant changes did occur around the city. The total number of registered voters increased dramatically in downtown, Walker's Point, and the Harbor District--no doubt reflecting population growth in that part of the city. Most wards on the north side of the city saw declines in the number of registered voters. The south side was a mixed bag.
+
+While the number of registered voters declined on the north side, the proportion of registered voters actually casting a ballot increased in most places. By comparison, turnout rates declined across much of the south side.
+
+Given Milwaukee's [recent population trends](https://law.marquette.edu/facultyblog/2019/09/whats-going-on-with-milwaukees-population-update/), it is plausible that the decline in registered voters (and ballots cast) in the north side reflects genuine population decline. However, the decline in ballots cast in the near south side suggests a decline in eligible voter participation.
+
+Use the map below to toggle between changes in the share of registered voters casting a ballot, the shift in total number of ballots cast, and the shift in total registered voters.
+
+```{r, message=FALSE, warning=FALSE}
+compare.turnout <- read_rds("/Users/johnsonjoh/Dropbox/Projects/2020/November/MilwaukeeCountyVotes/Report/LeafletFiles/CompareCityTurnout.rds")
+
+rv.turnout.pal <- colorBin(palette = "PRGn", bins = c(-Inf, -10, -5, 0 , 5, 10, Inf))
+ballots.and.rv.shift.pal <- colorBin(palette = "PRGn",
+                                     bins = c(-Inf, -500, -400, -300, -200, -100,
+                                              0, 100, 200, 300, 400, 500, Inf))
+
+
+leaflet() %>%
+  addProviderTiles(providers$CartoDB.Positron) %>%
+  setView(lat = 43.042361, lng = -87.972628, zoom = 11) %>%
+  addPolygons(data = compare.turnout,
+              group = "Shift in registered voters casting a ballot",
+              fillColor = ~rv.turnout.pal(pct_shift),
+              weight = 0.5, fillOpacity = 0.75,
+              label = ~lapply(rv_turnout_label, htmltools::HTML)) %>%
+  addPolygons(data = compare.turnout,
+              group = "Shift in # of ballots cast",
+              fillColor = ~ballots.and.rv.shift.pal(ballots_shift),
+              weight = 0.5, fillOpacity = 0.75,
+              label = ~lapply(ballots_shift_label, htmltools::HTML)) %>%
+  addPolygons(data = compare.turnout,
+              group = "Shift in # of registered voters",
+              fillColor = ~ballots.and.rv.shift.pal(rv_shift),
+              weight = 0.5, fillOpacity = 0.75,
+              label = ~lapply(rv_shift_label, htmltools::HTML)) %>%
+  addLayersControl(baseGroups = c("Shift in registered voters casting a ballot",
+                                  "Shift in # of ballots cast",
+                                  "Shift in # of registered voters"),
+                   options = layersControlOptions(collapsed = FALSE))
+```
+
+
+-------------------------------------------------
+
+### Vote preferences in the City of Milwaukee
+
+As already mentioned, the City of Milwaukee's overall contribution to Wisconsin's presidential election barely changed from 2016 to 2020. Biden won 76.5% of the vote, compared to Clinton's 78.8% in 2020. But Donald Trump also increased his vote share from 18.4% to 19.6% Consequently, the Democrat's margin of victory only increased marginally--from 58.1 points to 59.2.
+
+Still, some parts of the city saw more change. The 3rd Aldermanic district, covering the east side and Riverwest shifted the most. Joe Biden's margin of victory grew 10 points over Hillary Clinton's 4 years earlier. The second largest shift came in the 8th district, on the near south side. Voters here shifted 8 points toward Donald Trump in 2020. Its western neighbor, the 8th district, shifted toward Trump by 7 points. The 15th district, covering parts of the near north and near west sides, shifted 5 points toward Trump.
+
+Notable shifts in the Democratic direction also came in the 14th district (Bay View) and 5th district (northwest periphery), each of which shifted towards the Democrats by 7 points. The 4th district covering downtown and much of the near west side moved 6 points left, and the 10th district (Washington Heights, Enderis Park, the Zoo panhandle) shifted 5.
+
+It can be easy to overinterpret these shifts. The 3rd district's 10 point change means that Biden won with 82.5% of the vote compared to Clinton's 74%. Trump got 15.4% in 2016, down from 17.2% in 2016. It appears Biden's improvement came more at the expense of third parties than Trump.
+
+In the 12th district, on the other hand, Trump improved from 13.4% in 2016 to 19.2% in 2020, an increase of 537 votes. Biden declined to 79.0%, down from Clinton's 81.8% in 2016 and Obama's 86.6% in 2012.
+
+What explains Donald Trump's slightly increased popularity on Milwaukee's near south side? Much has already been written ("speculated" might be a better word) about Trump's evidently improved popularity with Latino voters in other parts of the country. An alternative explanation for Milwaukee's south side neighborhoods was suggested by *Urban Milwaukee*'s [Jeramey Jannene](https://urbanmilwaukee.com/2020/11/05/milwaukee-had-a-drop-in-college-voters-dramatic-shift-in-south-side-party-preference/). He wrote:
+
+> More examination is needed to determine if it’s a sign of a shift in the historic Hispanic and Latino support for Democrats and their policies, a dissatisfaction with Biden in particular or a sign that the white voters in the area, ones that repeatedly elected Robert Donovan, an avowedly pro-police alderman and Trump supporter, showed up in force to vote for Trump.
+
+The data I'm using in this piece can't definitively answer this question, but if Trump's south side strength was due to the remaining influence of Milwaukee's more conservative white ethnic communities I would also expect to see a similar pattern in the more predominantly non-Hispanic white south side neighborhoods of the 11th and 13th districts. Instead, we saw modest improvements for Joe Biden in these areas.
+
+Both these things remain true. Majority non-white neighborhoods in the city of Milwaukee are among the strongest bastions of the Democratic party, not just in Milwaukee County, but Wisconsin as a whole. At the same time, *some* of these neighborhoods are also among the few places in Milwaukee County were Donald Trump had more appeal in 2020 than 2016.
+
+&nbsp;
+```{r, warning=FALSE, message=FALSE}
+aldermanic.stats %>%
+  filter(race == "PRE") %>%
+  mutate(year = as.numeric(paste0("20", year)),
+         College = bachelors_degree + graduate_degree) %>%
+  select(aldermanic_district, year, White = white, Black = black_or_african_american,
+         Hispanic = hispanic_or_latino, College, dem_margin) %>%
+  arrange(year) %>%
+  pivot_wider(names_from = year, values_from = dem_margin) %>%
+  gt(rowname_col = "aldermanic_district") %>%
+  fmt_percent(columns = 2:5, decimals = 0, scale_values = F) %>%
+  fmt_number(columns = 6:11, decimals = 0) %>%
+  tab_spanner(columns = 2:5, label = "Demographic characteristics") %>%
+  tab_spanner(columns = 6:11, label = "Democratic presidential candidate vote margin") %>%
+  tab_footnote("Estimates from the 2014-18 ACS, aggregated from block groups",
+               locations = cells_column_spanners("Demographic characteristics")) %>%
+  tab_footnote("the Democratic candidate's vote share minus the Republican candidates vote share",
+               locations = cells_column_spanners("Democratic presidential candidate vote margin")) %>%
+  tab_footnote("unofficial returns", locations = cells_column_labels("2020")) %>%
+  tab_footnote("Calculated using disaggregated votes from the LTSB",
+               locations = cells_column_labels(c("2000","2004","2008"))) %>%
+  tab_footnote("non-Hispanic or Latino", locations = cells_column_labels(c("White", "Black"))) %>%
+  tab_stubhead("Aldermanic district") %>%
+  tab_header(title = "Presidential election results in Milwaukee Aldermanic districts, 2000 - 2020")
+```
+&nbsp;
+
+-------------------------------------------------
+
+### Vote preferences in the Milwaukee County suburbs
+
+All 18 Milwaukee county suburbs shifted toward the Democratic presidential candidate in 2020. Double-digit margin shifts occured in Wauwatosa (+12), Fox Point (+11), Brown Deer (+10), and Hales Corners (+10). The smallest shifts came in West Milwaukee (+1), South Milwaukee (+2), and Cudahy (+3).
+
+The gap between the southern suburbs and Milwaukee's wealthier north shore suburbs is clear. Only three suburbs did not exceed their 2008 high water mark of support for the Democratic candidate. They are Cudahy, Oak Creek, and South Milwaukee. The rest gave Joe Biden a higher margin of victory than any Democratic candidate since at least 2000.
+
+&nbsp;
+```{r, warning=FALSE, message=FALSE}
+suburban.votes %>% 
+  filter(race == "PRE") %>%
+  mutate(year = as.numeric(paste0("20",year))) %>% 
+  select(MCD_NAME, year, dem_margin) %>% 
+  pivot_wider(names_from = year, values_from = dem_margin) %>%
+  gt(rowname_col = "MCD_NAME") %>%
+  fmt_number(columns = c(2:7), decimals = 1) %>%
+  tab_spanner("Democratic presidential candidate vote margin",
+              columns = c(2:7)) %>%
+  tab_header(title = "Presidential election results in Milwaukee County suburbs, 2000 - 2020") %>%
+  tab_footnote("unofficial returns", locations = cells_column_labels("2020"))
+```
+&nbsp;
+
+-------------------------------------------------
+
+```{r, include=FALSE}
+# how polarized the aldermanic district
+aldermanic.votes %>%
+  filter(race == "PRE") %>% 
+  select(aldermanic_district, year, dem_margin) %>% 
+  group_by(year) %>%
+  summarise(mean = mean(dem_margin), min = min(dem_margin), 
+            max = max(dem_margin), sd = sd(dem_margin),
+            range = max - min)
+
+inner_join(
+  aldermanic.votes %>% filter(race == "PRE") %>%
+    group_by(year) %>% summarise(tot = sum(TOT), dem = sum(DEM), rep = sum(REP)) %>%
+    mutate(margin = ((dem/tot) - (rep/tot))*100) %>%
+    select(year, city_margin = margin),
+  suburban.votes %>% filter(race == "PRE") %>%
+    group_by(year) %>% summarise(tot = sum(TOT), dem = sum(DEM), rep = sum(REP)) %>%
+    mutate(margin = ((dem/tot) - (rep/tot))*100) %>%
+    select(year, suburb_margin = margin)
+) %>%
+  mutate(difference = city_margin - suburb_margin)
+
+```
+
+The 2020 presidential election was the most polarized in recent memory, yet as a consequence of the trends described above, the election in Milwaukee County was the least polarized in decades. It featured the smallest differences between Milwaukee's aldermanic districts and the smallest difference between the central city and the inner-ring suburbs of any election in the past 20 years.
