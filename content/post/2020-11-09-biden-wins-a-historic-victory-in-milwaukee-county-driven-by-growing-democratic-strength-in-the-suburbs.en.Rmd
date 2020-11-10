@@ -168,7 +168,7 @@ leaflet() %>%
 
 ### Vote preferences in the City of Milwaukee
 
-As already mentioned, the City of Milwaukee's overall contribution to Wisconsin's presidential election barely changed from 2016 to 2020. Biden won 76.5% of the vote, compared to Clinton's 78.8% in 2020. But Donald Trump also increased his vote share from 18.4% to 19.6% Consequently, the Democrat's margin of victory only increased marginally--from 58.1 points to 59.2.
+As already mentioned, the City of Milwaukee's overall contribution to Wisconsin's presidential election barely changed from 2016 to 2020. Clinton won 76.5% of the vote, compared to Biden's 78.8% in 2020. But Donald Trump also increased his vote share from 18.4% to 19.6% Consequently, the Democrat's margin of victory only increased marginally--from 58.1 points to 59.2.
 
 Still, some parts of the city saw more change. The 3rd Aldermanic district, covering the east side and Riverwest shifted the most. Joe Biden's margin of victory grew 10 points over Hillary Clinton's 4 years earlier. The second largest shift came in the 8th district, on the near south side. Voters here shifted 8 points toward Donald Trump in 2020. Its western neighbor, the 8th district, shifted toward Trump by 7 points. The 15th district, covering parts of the near north and near west sides, shifted 5 points toward Trump.
 
