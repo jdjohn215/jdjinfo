@@ -1,5 +1,5 @@
 ---
-title: Segregation and diversity don't go hand-in-hand
+title: segregation and diversity vary across American metros
 author: John Johnson
 date: '2021-03-11'
 slug: racial-diversity-vs-segregation
