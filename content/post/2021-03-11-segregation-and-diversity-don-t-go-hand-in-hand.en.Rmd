@@ -1,0 +1,27 @@
+---
+title: Segregation and diversity don't go hand-in-hand
+author: John Johnson
+date: '2021-03-11'
+slug: racial-diversity-vs-segregation
+categories:
+  - United States
+tags: []
+Description: ''
+Tags: []
+Categories: []
+DisableComments: no
+---
+
+The graph below compares racial diversity and residential segregation in U.S. metropolitan areas with population's of at least 500,000. One immediately noticeable thing is that there isn't much of a trend between diversity and segregation. Some high-diversity places also have high segregation, but others have relatively low segregation. Ditto for low-diversity metros.
+
+![](/post/2021-03-11-segregation-and-diversity-don-t-go-hand-in-hand.en_files/DiversityAndSegregationv2.png)
+
+### About the data
+
+I calculated these statistics using 2015-19 American Community Survey block group data retrieved from IPUMS NHGIS, University of Minnesota. I included population counts for residents who identified as (non-Hispanic) white, Black, Asian, Native American, Pacific Islander, or Hispanic/Latino of any race. 
+
+The x-axis shows a simple Simpson's diversity index for these groups. It shows the probability that two randomly chosen residents of a given metropolitan area would be from different groups.
+
+The y-axis is a composite of the 13 individual [dissimilarity indices](https://www.dartmouth.edu/~segregation/IndicesofSegregation.pdf) calculated between every combination of 6 racial or ethnic groups indicated above. After calculating each index, I found the mean of them all, weighted to the share of the metro's population included in each index.
+
+[Click here to download](https://www.dropbox.com/s/7bl2efxhh124u41/LargeMetrosAllIndices.csv?dl=1) the underlying statistics for each metro area included in the graph.
