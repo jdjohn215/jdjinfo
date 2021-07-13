@@ -1,0 +1,60 @@
+---
+title: Marriage and social class - it's about more than wages
+author: John Johnson
+date: '2021-07-13'
+slug: marriage-and-social-class-it-s-about-more-than-wages
+categories:
+  - United States
+tags: []
+Description: ''
+Tags: []
+Categories: []
+DisableComments: no
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(tidyverse)
+library(plotly)
+
+occupation.wage.avg <- read_rds("~/Desktop/work/2021/july/SpousalOccupation/SpouseWageComparison/data/MedianWageOfAnOccupationsSpouses.rds")
+int.plot <- occupation.wage.avg %>%
+  ggplot(aes(median_wage, median_spouse_wage, group = occupation,
+             size = wtd_count)) +
+  geom_point(alpha = 0.5) +
+  scale_x_continuous(labels = scales::dollar_format(big.mark = ","),
+                     name = "median wage of people holding this occupation") +
+  scale_y_continuous(labels = scales::dollar_format(big.mark = ","),
+                     name = "median wage of spouses of people in this occupation") +
+  geom_abline(intercept = 0, slope = 1) +
+  labs(title = "Median annual income of married workers in selected occupations . . .",
+       subtitle = "compared with the median income of their spouses",
+       caption = "Data from the 2015-19 American Community Survey, retrieved from IPUMS ACS. Calculations by @jdjmke. Median income includes part time workers, but not the unemployed.") +
+  theme_minimal() +
+  theme(plot.title.position = "plot",
+        legend.position = "none")
+```
+
+The economist and blogger Noah Smith recently wrote an interesting [column about social class](https://noahpinion.substack.com/p/social-class-in-america) in which he argued that Americans are more rigidly divided by class in our social lives than people in many other countries. For instance, he suggested that in Japan "top college graduates marry construction workers"--implying this is unlikely in the U.S.
+
+This idea of class stratification in marriages piqued my interest. I can't speak to the situation in other countries, but I wanted to know more about how this plays out in America. To get a better idea, I downloaded individual-level data from the 2015-19 American Community Survey. Subsetting for married couples where both people work left me with about 2.9 million cases.
+
+Here are the results. I present the same scatter plot twice. Once to show the full range of the data, and again to make reading the labels easier. Please click either image to view it in full screen, or scroll down for a version with interactive tooltips.
+
+![](/post/2021-07-13-marriage-and-social-class-it-s-about-more-than-wages.en_files/SpouseIncomeComparisonv3.png){width=49%}
+![](/post/2021-07-13-marriage-and-social-class-it-s-about-more-than-wages.en_files/SpouseIncomeComparisonv2.png){width=50%}
+
+The overall correlation between spouse incomes is fairly weak. There are lots of marriages between low and high earners. But the role of social class is clear in the *kinds* of jobs which fall in each quadrant. The occupations held by low earners who are married to high earners are much different than the kinds of jobs held by low earners married to similarly low earning spouses.
+
+Dishwashers and Exercise Trainers are a particularly stark example of this. They have similar median incomes (I'm including part time workers in these calculations). Dishwashers make $14,601 and Exercise Trainers make $15,600. But their spouses could hardly be more different. The typical spouse of a dishwasher makes $22,908, while the average spouses of trainers earn $73,304. Trainers personally only make 7% more than dishwashers, but their *household income* is **237%** higher than the household income of dishwashers who are likewise in dual-earner marriages.
+
+Apart from money, the social class aspect of this is clear when you look compare the most common occupations of these workers' spouses. The most common spouses of exercise trainers include managers, chief executives, lawyers, physicians, and software developers. Dishwashers are more likely to be married to cooks, maids, janitors, cashiers, constructions workers, truck drivers, and personal care aides.
+
+Use the tool below to compare the most common spouse occupations for different groups of workers. Once again, the universe is dual-earner married couples.
+
+<iframe src="https://lubarcenter.shinyapps.io/SpouseWageComparison/" width=100% height=800"></iframe>
+
+### interactive version
+```{r}
+ggplotly(int.plot, tooltip = c("group","x","y"))
+```
