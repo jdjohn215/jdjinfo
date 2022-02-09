@@ -1,0 +1,120 @@
+---
+title: Neighborhoods where Milwaukee isn't segregated (2020 update)
+author: John Johnson
+date: '2022-02-08'
+slug: []
+categories:
+  - Milwaukee
+tags: []
+Description: ''
+Tags: []
+Categories: []
+DisableComments: no
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(reactable)
+library(sf)
+library(tmap)
+knitr::opts_chunk$set(echo = FALSE,
+                      warning = FALSE,
+                      message = FALSE)
+neighborhood.comparison <- read_rds("~/Dropbox/Projects/2022/February/NeighborhoodSegregation/data/NeighborhoodStatsComparison.rds")
+neighborhood.largest <- read_rds("~/Dropbox/Projects/2022/February/NeighborhoodSegregation/data/NeighborhoodLargestGroup.rds")
+neighborhood.sf <- read_rds("~/Dropbox/Projects/2019/December/Milwaukee-Geo-Crosswalks/SourceData/MilwaukeeNeighborhoods.rds") %>%
+  mutate(neighborhood = str_to_title(neighborhood)) %>%
+  inner_join(neighborhood.comparison) %>%
+  filter(pop_2020 >= 400) %>%
+  mutate(sdi_diff = sdi_2020 - sdi_2010)
+```
+
+*This post updates a previous one, which used older and less granular survey data. New census data allows for much more accurate measurement of neighborhood demographics. Because of data quality concerns stemming from the Census Bureau's new differential privacy techniques, I do not present data for neighborhoods with fewer than 400 residents.*
+
+The 2020 Census reconfirmed Milwaukee's status as one of the most segregated cities and metropolitan areas in the United States.
+
+According to Brown University's [Diversity and Disparities Project](https://s4.ad.brown.edu/projects/diversity/SegCitySorting2020/Default.aspx), metro-wide Black-white segregation declined slightly, but the Milwaukee metro still ranks 2nd-most segregated, just as in 2010. Within city limits, the absolute degree of Black-white segregation measured by Brown University remained unchanged, and segregation between other groups declined only modestly.
+
+These dismal statistics point to how far Milwaukee remains from being a fair place to live for most of its residents. Still, there are neighborhoods in Milwaukee that saw significant positive change over the last decade. Their populations grew more representative of the city as a whole. 
+
+One way to measure this is a "diversity index," which shows the likelihood that two people randomly chosen from the same neighborhood would identify with different races. The diversity index increased in over 2/3 of Milwaukee neighborhoods during the past decade. I calculated that the diversity index exceeds 50% in 83 of Milwaukee's 164 neighborhoods with at least 400 residents. In 2010, just 49 neighborhoods met this threshold. Over a dozen Milwaukee neighborhoods in 2020 had *no* racial or ethnic majority group.
+
+```{r, fig.width=4.5, figures-side, fig.show="hold", out.width="50%", fig.cap="Note: neighborhoods with populations less than 400 are not shown"}
+tm_shape(neighborhood.sf) +
+  tm_fill(col = "sdi_2020", breaks = c(0, 0.2, 0.4, 0.6, 0.8), 
+          style = "cont", palette = "Greens", title = "index") +
+  tm_layout(main.title = "Diversity index, 2020", frame = F)
+tm_shape(neighborhood.sf) +
+  tm_fill(col = "sdi_diff", style = "cont", palette = "PRGn",
+          breaks = seq(-.25, .25, .1), title = "index") +
+  tm_layout(main.title = "Change in diversity\nindex, 2010-20", frame = F)
+```
+
+Milwaukee's most diverse neighborhoods tend to be working or lower-middle class and located in one of three clusters on the south, west, and northwest sides of the city.
+
+The south side cluster lies roughly between the airport and Alverno College. It includes:
+
+*   Southpoint - 27% (non-Hispanic) white, 39% Hispanic or Latino, 19% Asian, and 11% Black
+*   Castle Manor - 45% white, 25% Latino, 14% Asian, and 12% Black
+*   Alverno - 43% white, 34% Latino, 12% Asian, and 12% Black
+*   [Mitchell West](http://www.neighborhoodsinmilwaukee.org/Mitchell%20West.pdf) - 44% white, 21% Asian, 21% Latino, and 9% Black
+
+The west side cluster is located between Washington Park and the Brewers' stadium. It includes:
+
+*   Martin Drive - 40% Black, 31% white, 11% Asian, 10% Latino
+*   Miller Valley - 44% Black, 23% white, 16% Latino, and 9% Asian
+*   Pigsville - 46% white, 20% Black, 19% Latino, and 5% Asian
+
+The northwest side cluster is mostly subdivision-style developments of single-family homes west of the Little Menomonee River, including the neighborhoods of:
+
+*   Little Menomonee Parkway - 39% Black, 31% white, 12% Asian, and 11% Latino
+*   Pheasant Run - 40% Black, 35% white, 12% Asian, and 8% Latino
+*   Florist Highlands - 46% Black, 32% white, 8% Latino, and 6%
+
+The least diverse neighborhoods, by contrast, are all those on the deeply segregated near north side of the city. At least 9-in-10 residents of Arlington Heights, Borchert Field, Franklin Heights, Garden Homes, Triangle North, and Rufus King are Black. But neighborhoods elsewhere in Milwaukee also make the list of deeply segregated places. The Third Ward, Upper East Side, Fernwood, Downer Woods, and Northpoint, are all among the top-21 least-diverse neighborhoods in the city. More than 8-in-10 residents in these 5 neighborhoods are non-Hispanic white.
+
+Highly-segregated neighborhoods far outnumber the integrated parts of Milwaukee, as the city's position in national rankings attests. And these hyper-segregated neighborhoods--both Black and white--rightfully loom large in public perceptions of Milwaukee. Still, descriptions of Milwaukee as "a tale of two cities" don't fully capture this other piece of the city, where people of many races live their lives next door to each other. These aren't the name-brand neighborhoods along the lake, but they are success stories in their own right. We should celebrate them for it.
+
+### Comparison of Milwaukee neighborhood demographics, using 2010 and 2020 census data
+
+```{r}
+neighborhood.comparison %>%
+  select(-starts_with("two")) %>%
+  reactable(striped = T, showPageSizeOptions = T,
+            columns = list(
+              neighborhood = colDef(name = "Neighborhood", filterable = T),
+              sdi_2010 = colDef(name = "2010", sortable = T, maxWidth = 65,
+                                format = colFormat(digits = 2)),
+              sdi_2020 = colDef(name = "2020", sortable = T, maxWidth = 65,
+                                format = colFormat(digits = 2)),
+              pop_2010 = colDef(name = "2010", sortable = T, maxWidth = 65,
+                                format = colFormat(separators = T, digits = 0)),
+              pop_2020 = colDef(name = "2020", sortable = T, maxWidth = 65,
+                                format = colFormat(separators = T, digits = 0)),
+              black_2010 = colDef(name = "2010", sortable = T, maxWidth = 65,
+                                  format = colFormat(digits = 0, suffix = "%")),
+              black_2020 = colDef(name = "2020", sortable = T, maxWidth = 65,
+                                  format = colFormat(digits = 0, suffix = "%")),
+              white_2010 = colDef(name = "2010", sortable = T, maxWidth = 65,
+                                  format = colFormat(digits = 0, suffix = "%")),
+              white_2020 = colDef(name = "2020", sortable = T, maxWidth = 65,
+                                  format = colFormat(digits = 0, suffix = "%")),
+              hisp_2010 = colDef(name = "2010", sortable = T, maxWidth = 65,
+                                 format = colFormat(digits = 0, suffix = "%")),
+              hisp_2020 = colDef(name = "2020", sortable = T, maxWidth = 65,
+                                 format = colFormat(digits = 0, suffix = "%")),
+              asian_2010 = colDef(name = "2010", sortable = T, maxWidth = 65,
+                                  format = colFormat(digits = 0, suffix = "%")),
+              asian_2020 = colDef(name = "2020", sortable = T, maxWidth = 65,
+                                  format = colFormat(digits = 0, suffix = "%"))
+            ),
+            columnGroups = list(
+              colGroup(name = "Diversity index", columns = c("sdi_2010", "sdi_2020")),
+              colGroup(name = "Total pop.", columns = c("pop_2010", "pop_2020")),
+              colGroup(name = "Black alone", columns = c("black_2010", "black_2020")),
+              colGroup(name = "White alone", columns = c("white_2010", "white_2020")),
+              colGroup(name = "Hisp. or Latino", columns = c("hisp_2010", "hisp_2020")),
+              colGroup(name = "Asian alone", columns = c("asian_2010", "asian_2020"))
+            ))
+```
+
